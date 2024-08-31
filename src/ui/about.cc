@@ -19,7 +19,7 @@ About::About( QWidget * parent, std::vector< sptr< Dictionary::Class > > * dicto
 
   ui.qtVersion->setText( tr( "Based on Qt %1 (%2, %3)" )
                            .arg( QLatin1String( qVersion() ), Version::compiler, QSysInfo::currentCpuArchitecture() )
-                         + " (Xapian inside)" );
+                         + " (test there)" );
 
   connect( ui.copyInfoBtn, &QPushButton::clicked, [] {
     QGuiApplication::clipboard()->setText( Version::everything() );

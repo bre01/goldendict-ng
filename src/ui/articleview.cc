@@ -933,10 +933,18 @@ void ArticleView::linkClickedInHtml( QUrl const & url_ )
 
 void ArticleView::makeAnkiCardFromArticle( QString const & article_id )
 {
-  auto const js_code = QString( R"EOF(document.getElementById("gdarticlefrom-%1").innerText)EOF" ).arg( article_id );
-  webview->page()->runJavaScript( js_code, [ this ]( const QVariant & article_text ) {
-    sendToAnki( webview->title(), article_text.toString(), translateLine->text() );
+  auto const js_code = QString( R"EOF(document.getElementById("gdarticlefrom-%1").innerHTML)EOF" ).arg( article_id );
+  auto const js_css=QString(R"EOF(document.getElementsByTagName("style")[0].outerHTML)EOF" );
+  auto st = std::make_shared<QString>();
+  webview->page()->runJavaScript( js_code, [ this,st]( const QVariant & article_text ) {
+    st->append(article_text.toString());
   } );
+  webview->page()->runJavaScript(js_css,[this,st](const QVariant &css_text){
+    st->append(css_text.toString());
+    sendToAnki( webview->title(),*st, translateLine->text() );
+
+
+  });
 }
 
 void ArticleView::openLink( QUrl const & url, QUrl const & ref, QString const & scrollTo, Contexts const & contexts_ )
