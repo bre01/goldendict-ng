@@ -1,5 +1,18 @@
-# GoldenDict-ng
 
+
+
+
+
+## Customizable CSS for Anki
+
+This fork introduces the ability to customize the CSS for Anki notes sent directly from GoldenDict. It can fetch the CSS automatically or you can define your own styles for better control over how your exported content appears in Anki, providing a more personalized and flexible experience.
+|Before|CSS Auto fecthed|
+|--|--|
+|![alt text](image-2.png)|![alt text](image-1.png)|
+
+
+
+# GoldenDict-ng with CSS for Anki integration
 [![Crowdin](https://badges.crowdin.net/goldendict-ng/localized.svg)](https://crowdin.com/project/goldendict-ng)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=xiaoyifang_goldendict&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=xiaoyifang_goldendict)
 [![Windows-6.x](https://github.com/xiaoyifang/goldendict-ng/actions/workflows/windows-6.x.yml/badge.svg)](https://github.com/xiaoyifang/goldendict-ng/actions/workflows/windows-6.x.yml)
@@ -9,9 +22,12 @@ The Next Generation GoldenDict. A feature-rich open-source dictionary lookup pro
 supporting [multiple dictionary formats](https://xiaoyifang.github.io/goldendict-ng/dictformats/) and online
 dictionaries.
 
+
 | Linux | Windows | macOS |
 |--|--|--|
 | [<img src="website/docs/img/linux_genshin.webp" width="500"/>](https://xiaoyifang.github.io/goldendict-ng/) | [<img src="website/docs/img/windows_white.webp" width="500"/>](https://xiaoyifang.github.io/goldendict-ng/) | [<img src="website/docs/img/mac_black.webp" width="500"/>](https://xiaoyifang.github.io/goldendict-ng/) |
+
+
 
 # Some significant features of this fork
 
