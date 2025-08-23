@@ -1,6 +1,7 @@
 /* This file is (c) 2008-2012 Konstantin Isakov <ikm@goldendict.org>
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
+#include <QtNetwork/qnetworkreply.h>
 #include <stdint.h>
 #include <QUrl>
 #include "article_netmgr.hh"
@@ -434,6 +435,8 @@ void LocalSchemeHandler::requestStarted( QWebEngineUrlRequestJob * requestJob )
   }
 
   QNetworkReply * reply = this->mManager.getArticleReply( request );
-  requestJob->reply( "text/html", reply );
+  QNetworkRequest googleReq(QUrl("https://google.com/"));
+  QNetworkReply * random=this->mManager.get(googleReq);
+  requestJob->reply( "text/html", reply);
   connect( requestJob, &QObject::destroyed, reply, &QObject::deleteLater );
 }

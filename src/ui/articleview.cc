@@ -26,11 +26,18 @@
 #include <QWebEngineScript>
 #include <QWebEngineScriptCollection>
 #include <QWebEngineSettings>
+#include <QtConcurrent/qtconcurrentrun.h>
+#include <QtCore/qmutex.h>
+#include <algorithm>
+#include <atomic>
+#include <iterator>
 #include <map>
 #include <QApplication>
 #include <QRandomGenerator>
 #include <QWebEngineContextMenuRequest>
 #include <QWebEngineFindTextResult>
+#include <memory>
+#include <shared_mutex>
 #include <utility>
 #ifdef Q_OS_WIN32
   #include <windows.h>
@@ -590,6 +597,7 @@ void ArticleView::tryMangleWebsiteClickedUrl( QUrl & url, Contexts & contexts )
 void ArticleView::load( QUrl const & url )
 {
   webview->load( url );
+  QString str=url.toString();
 }
 
 void ArticleView::cleanupTemp()
@@ -913,12 +921,239 @@ void ArticleView::linkClickedInHtml( QUrl const & url_ )
   }
 }
 
+void findGdauUrls(const QString& html)
+{
+  // Regex to find gdau:// URLs inside any attribute
+  // This looks for something like attribute="gdau://..."
+  QRegularExpression regex(R"((\w+)=\"gdau://([^\"]+)\")");
+
+  QRegularExpressionMatchIterator i = regex.globalMatch(html);
+
+  while (i.hasNext()) {
+    QRegularExpressionMatch match = i.next();
+    QString attributeName = match.captured(1);  // e.g. href or data-src-mp3
+    QString gdauPath = match.captured(2);       // the path after gdau://
+
+    qDebug() << "Found gdau URL in attribute" << attributeName << ":" << gdauPath;
+  }
+}
+
+QString ArticleView::replaceTags(QString &html){
+  auto ptags=std::make_shared<QVector<GdauTagInfo>>(  );
+
+  QRegularExpression tagRegex( R"(<a\b[^>]*\b(href|data-src-mp3)\s*=\s*"gdau://[^"]+"[^>]*>.*?</a>)",QRegularExpression::DotMatchesEverythingOption);
+  QRegularExpressionMatchIterator i= tagRegex.globalMatch(html);
+  int id =0;
+  while(i.hasNext()){
+    id +=1;
+    QRegularExpressionMatch match=i.next();
+    QString fullTag=match.captured(0);
+    //QString url=match.captured(1);
+    /*
+    int beginPos=match.capturedStart(0);
+    int endPos=match.capturedEnd(0);
+    //cant use offset since multiple tags*/
+
+
+    //QString attributes = match.captured(2);
+
+    // Regex to extract gdau:// url inside the attributes string
+    QRegularExpression urlRegex(R"(gdau://[^\"'\s>]+)");
+    QRegularExpressionMatch urlMatch = urlRegex.match(fullTag);
+
+    QString urlString;
+    if (urlMatch.hasMatch()) {
+      urlString = urlMatch.captured(0);
+    }
+    qDebug() << urlString <<"\n";
+
+
+    QUrl url(urlString);
+    sptr<Dictionary::Class> dict = dictionaryGroup->getDictionaryById(url.host().toStdString());
+    if (!dict) continue;
+    sptr<Dictionary::DataRequest> req = dict->getResource(url.path().mid(1).toUtf8().data());
+
+    AudioResource ar{"",false,req,std::make_shared<QMutex>(  )};
+    ptags->append({id,fullTag,urlString,ar});
+  }
+  //QVector<AudioResource> audioResources;
+  //QVector<sptr<Dictionary::DataRequest>> reqs;
+  //race=true;
+  /*
+  for (const auto &GdauTagInfo : tags) {
+    QString urlStr=GdauTagInfo.url;
+    QUrl url(GdauTagInfo.url);
+    sptr<Dictionary::Class> dict = dictionaryGroup->getDictionaryById(url.host().toStdString());
+    if (!dict) continue;
+
+    sptr<Dictionary::DataRequest> req = dict->getResource(url.path().mid(1).toUtf8().data());
+
+    AudioResource ar{ "", false, req, std::make_shared<QMutex>()};
+    audioResources.append(ar);
+  }
+  */
+  auto tags=*ptags ;
+  for (auto &tag: tags) {
+    sptr<Dictionary::DataRequest> req=tag.resource.req;
+    QString urlStr =tag.url;
+    connect(req.get(), &Dictionary::Request::finished, this, [this, req, ptags, tag,html]() {
+        onAudioRequestFinished(req, ptags, tag.id, html);
+      });
+
+  }
+  /*
+  QtConcurrent::run([audioResources]() {
+    onAllAudioResourcesReady(audioResources, html);
+  */
+  /*
+  connect(checkMechain,CM::allDone,this,[this,audioResources,html]->void {
+      return ;
+  });
+  */
+
+  return QString();
+};
+
+
+
+
+void ArticleView::onAudioRequestFinished(sptr<Dictionary::DataRequest> req, std::shared_ptr<QVector<GdauTagInfo>> ptags,int tagid,QString html) {
+  if (req->dataSize() > 0) {
+    QByteArray data(req->getFullData().data(), static_cast<int>(req->dataSize()));
+    QString base64Audio = data.toBase64();
+
+    // find resource in vector by url and update
+    for (auto &tag : *ptags) {
+      if (tag.id == tagid) {
+        //tag.resource.mutex->lock();
+        tag.resource.base64Data = base64Audio;
+        tag.resource.finished = true;
+        //tag.resource.mutex->unlock();
+        break;
+      }
+    }
+    onAllAudioResourcesReady(ptags,html);
+
+    /*
+    // Check if all finished:
+    if (!resourceLocked) {
+      resourceLocked=true;
+      bool allDone = std::all_of(resources.begin(), resources.end(), [](const AudioResource &r) { return r.finished; });
+      resourceLocked=false;
+      if (allDone && race) {
+        onAllAudioResourcesReady(resources,html);
+      }
+    }
+      */
+  }
+}
+
+void ArticleView::onAllAudioResourcesReady(std::shared_ptr<QVector<GdauTagInfo>> ptags,QString &originalHtml) {
+  //let's use simple method
+  //use a spin lock
+  for(auto & tag:*ptags) {
+      //tag.resource.mutex->lock();
+      if (!tag.resource.finished) return;
+      //tag.resource.mutex->unlock();
+  }
+
+  //QString modifiedHtml =originalHtml;
+  //race=false;
+  auto tags=*ptags;
+  for (const auto &tag : *ptags) {
+    qDebug() << tag.resource.base64Data <<'\n' ;
+    QString base64DataUrl = QString("data:audio/mp3;base64,%1").arg(tag.resource.base64Data);
+    QString newTag=tag.fullTag;
+    int onclickPosition=newTag.indexOf("onclick=");
+    newTag.insert(onclickPosition+9,"this.querySelector('audio').play();");
+
+    int insertPos = newTag.indexOf('>'); // position of first '>'
+    if (insertPos != -1) {
+      QString audioTag = QString(
+          R"(<audio> <source src="%1" type="audio/mpeg">
+               Your browser does not support the audio element.
+           </audio>)"
+      ).arg(base64DataUrl);
+      newTag.insert(insertPos+1,audioTag);
+    }
+
+    qDebug() << tag.fullTag;
+    // Replace all occurrences of gdau URL with base64 URL in your HTML string
+    originalHtml.replace(tag.fullTag, newTag);
+  }
+
+  sendToAnki(webview->title(), originalHtml, translateLine->text());
+}
+
+
+void findGdauTags(const QString& html)
+{
+  QRegularExpression tagRegex(R"(<(\w+)([^>]*?gdau://[^>]*?)>)");
+  QRegularExpressionMatchIterator i = tagRegex.globalMatch(html);
+
+  while (i.hasNext()) {
+    QRegularExpressionMatch match = i.next();
+    QString tagName = match.captured(1);   // e.g. "a"
+    QString fullTag = match.captured(0);   // the whole tag, e.g. <a ... >
+
+    qDebug() << "Found tag:" << tagName << "\nFull tag text:" << fullTag << "\n";
+  }
+}
+
+
+QString embedAudioBase64(QString html)
+{
+  // Regex to match gdau:// URLs in href or data-src-mp3 attributes
+
+  QRegularExpression regex(R"delim((href|data-src-mp3)="gdau://([^"]+)")delim");
+  QRegularExpressionMatchIterator i = regex.globalMatch(html);
+
+  while (i.hasNext()) {
+    QRegularExpressionMatch match = i.next();
+    QString attr = match.captured(1);    // href or data-src-mp3
+    QString resourcePath = match.captured(2); // path after gdau://
+
+    // Construct resource path according to your resource system
+    // For example, if resourcePath is "64b124f9ac24cfde2acffccb4523068c/media/english/breProns/ld41ai.mp3"
+    // you need to map this to your Qt resource or file path
+    QString qrcPath = QString(":/%1").arg(resourcePath); // Adjust this if needed
+
+    QFile file(qrcPath);
+    if (!file.open(QIODevice::ReadOnly)) {
+      qWarning() << "Failed to open resource:" << qrcPath;
+      continue;
+    }
+
+    QByteArray data = file.readAll();
+    QString base64Data = QString::fromLatin1(data.toBase64());
+
+    QString dataUrl = QString("data:audio/mpeg;base64,%1").arg(base64Data);
+
+    // Replace the old URL with data URL in html
+    // Note: Use exact match from captured text
+    QString oldUrl = QString("%1=\"gdau://%2\"").arg(attr, resourcePath);
+    QString newUrl = QString("%1=\"%2\"").arg(attr, dataUrl);
+
+    html.replace(oldUrl, newUrl);
+  }
+
+  return html;
+}
+
+
 void ArticleView::makeAnkiCardFromArticle( QString const & article_id )
 {
-  auto const js_code = QString( R"EOF(document.getElementById("gdarticlefrom-%1").innerText)EOF" ).arg( article_id );
-  webview->page()->runJavaScript( js_code, [ this ]( const QVariant & article_text ) {
-    sendToAnki( webview->title(), article_text.toString(), translateLine->text() );
+ auto const js_code = QString( R"EOF(document.getElementById("gdarticlefrom-%1").innerHTML)EOF" ).arg( article_id );
+  auto const js_css=QString(R"EOF(document.getElementsByTagName("style")[0].outerHTML)EOF" );
+  auto st = std::make_shared<QString>();
+  webview->page()->runJavaScript( js_code, [ this,st]( const QVariant & article_text ) {
+    st->append(article_text.toString());
   } );
+  webview->page()->runJavaScript(js_css,[this,st](const QVariant &css_text){
+    st->append(css_text.toString());
+    replaceTags(*st);
+        //sendToAnki(webview->title(), embeddedHtml, translateLine->text());
+  });
 }
 
 void ArticleView::openLink( QUrl const & url, QUrl const & ref, QString const & scrollTo, Contexts const & contexts_ )
@@ -1663,6 +1898,11 @@ void ArticleView::resourceDownloadFinished( const sptr< Dictionary::DataRequest 
                this,
                &ArticleView::audioPlayerError,
                Qt::UniqueConnection );
+      QByteArray byteArray(data.data(), static_cast<int>(data.size()));
+      QString base64Audio = byteArray.toBase64();
+
+      // For debug, output first 200 chars to avoid flooding log
+      qDebug() << "Base64 audio full 1 " << base64Audio;
       QString errorMessage = audioPlayer->play( data.data(), data.size() );
       if ( !errorMessage.isEmpty() ) {
         QMessageBox::critical( this, "GoldenDict", tr( "Failed to play sound file: %1" ).arg( errorMessage ) );
@@ -1708,6 +1948,11 @@ void ArticleView::audioDownloadFinished( const sptr< Dictionary::DataRequest > &
              &ArticleView::audioPlayerError,
              Qt::UniqueConnection );
     QString errorMessage = audioPlayer->play( data.data(), data.size() );
+    QByteArray byteArray(data.data(), static_cast<int>(data.size()));
+    QString base64Audio = byteArray.toBase64();
+
+    // For debug, output first 200 chars to avoid flooding log
+    qDebug() << "Base64 audio full " << base64Audio;
     if ( !errorMessage.isEmpty() ) {
       QMessageBox::critical( this, "GoldenDict", tr( "Failed to play sound file: %1" ).arg( errorMessage ) );
     }
