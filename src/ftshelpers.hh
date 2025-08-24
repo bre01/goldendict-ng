@@ -32,7 +32,7 @@ class FTSResultsRequest: public Dictionary::DataRequest
 public:
 
   FTSResultsRequest( BtreeIndexing::BtreeDictionary & dict_,
-                     const QString & searchString_,
+                     QString const & searchString_,
                      int searchMode_,
                      bool matchCase_,
                      bool ignoreDiacritics_ ):

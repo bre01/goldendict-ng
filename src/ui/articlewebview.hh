@@ -4,8 +4,10 @@
 #pragma once
 
 #include "config.hh"
+#include <QEvent>
 #include <QMouseEvent>
 #include <QWebEngineView>
+#include <QPointer>
 
 /// A thin wrapper around QWebEngineView to accommodate to some ArticleView's needs.
 /// Currently the only added features:
@@ -70,5 +72,5 @@ private:
 public slots:
 
   //receive signal ,a link has been clicked.
-  void linkClickedInHtml( const QUrl & url );
+  void linkClickedInHtml( QUrl const & url );
 };

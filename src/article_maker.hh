@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <QObject>
+#include <QMap>
 #include <set>
 #include <list>
 #include "config.hh"
@@ -16,8 +18,8 @@ class ArticleMaker: public QObject
   Q_OBJECT
   // We make it QObject to use tr() conveniently
 
-  const std::vector< sptr< Dictionary::Class > > & dictionaries;
-  const std::vector< Instances::Group > & groups;
+  std::vector< sptr< Dictionary::Class > > const & dictionaries;
+  std::vector< Instances::Group > const & groups;
   const Config::Preferences & cfg;
 
 public:
@@ -26,8 +28,8 @@ public:
   /// groups' instances are to be passed. Those references are kept stored as
   /// references, and as such, any changes to them would reflect on the results
   /// of the inquiries, although those changes are perfectly legal.
-  ArticleMaker( const std::vector< sptr< Dictionary::Class > > & dictionaries,
-                const std::vector< Instances::Group > & groups,
+  ArticleMaker( std::vector< sptr< Dictionary::Class > > const & dictionaries,
+                std::vector< Instances::Group > const & groups,
                 const Config::Preferences & cfg );
 
   /// Looks up the given phrase within the given group, and creates a full html
@@ -39,23 +41,23 @@ public:
   /// the keys are dictionary ids.
   /// If mutedDicts is not empty, the search would be limited only to those
   /// dictionaries in group which aren't listed there.
-  sptr< Dictionary::DataRequest > makeDefinitionFor( const QString & word,
+  sptr< Dictionary::DataRequest > makeDefinitionFor( QString const & word,
                                                      unsigned groupId,
-                                                     const QMap< QString, QString > & contexts,
-                                                     const QSet< QString > & mutedDicts = QSet< QString >(),
-                                                     const QStringList & dictIDs        = QStringList(),
+                                                     QMap< QString, QString > const & contexts,
+                                                     QSet< QString > const & mutedDicts = QSet< QString >(),
+                                                     QStringList const & dictIDs        = QStringList(),
                                                      bool ignoreDiacritics              = false ) const;
 
   /// Makes up a text which states that no translation for the given word
   /// was found. Sometimes it's better to call this directly when it's already
   /// known that there's no translation.
-  sptr< Dictionary::DataRequest > makeNotFoundTextFor( const QString & word, const QString & group ) const;
+  sptr< Dictionary::DataRequest > makeNotFoundTextFor( QString const & word, QString const & group ) const;
 
   /// Creates an 'untitled' page. The result is guaranteed to be instant.
   sptr< Dictionary::DataRequest > makeEmptyPage() const;
 
   /// Create page with one picture
-  sptr< Dictionary::DataRequest > makePicturePage( const std::string & url ) const;
+  sptr< Dictionary::DataRequest > makePicturePage( std::string const & url ) const;
 
   /// Add base path to file path if it's relative and file not found
   /// Return true if path successfully adjusted
@@ -65,12 +67,12 @@ public:
   string makeBlankHtml() const;
 
 private:
-  std::string readCssFile( const QString & fileName, std::string type ) const;
+  std::string readCssFile( QString const & fileName, std::string type ) const;
   /// Makes everything up to and including the opening body tag.
-  std::string makeHtmlHeader( const QString & word, const QString & icon, bool expandOptionalParts ) const;
+  std::string makeHtmlHeader( QString const & word, QString const & icon, bool expandOptionalParts ) const;
 
   /// Makes the html body for makeNotFoundTextFor()
-  static std::string makeNotFoundBody( const QString & word, const QString & group );
+  static std::string makeNotFoundBody( QString const & word, QString const & group );
 
   friend class ArticleRequest; // Allow it calling makeNotFoundBody()
 };
@@ -102,7 +104,7 @@ class ArticleRequest: public Dictionary::DataRequest
   using Spacings = QList< QString >;
 
   /// Splits the given string into words and spacings between them.
-  std::pair< Words, Spacings > splitIntoWords( const QString & );
+  std::pair< Words, Spacings > splitIntoWords( QString const & );
 
   std::pair< Words, Spacings > splittedWords;
   int currentSplittedWordStart;
@@ -116,11 +118,11 @@ class ArticleRequest: public Dictionary::DataRequest
 
 public:
 
-  ArticleRequest( const QString & phrase,
-                  const Instances::Group & group,
-                  const QMap< QString, QString > & contexts,
-                  const std::vector< sptr< Dictionary::Class > > & activeDicts,
-                  const std::string & header,
+  ArticleRequest( QString const & phrase,
+                  Instances::Group const & group,
+                  QMap< QString, QString > const & contexts,
+                  std::vector< sptr< Dictionary::Class > > const & activeDicts,
+                  std::string const & header,
                   int sizeLimit,
                   bool needExpandOptionalParts_,
                   bool ignoreDiacritics = false );
@@ -146,12 +148,12 @@ private:
   QString makeSplittedWordCompound();
 
   /// Makes an html link to the given word.
-  std::string linkWord( const QString & );
+  std::string linkWord( QString const & );
 
   /// Escapes the spacing between the words to include in html.
-  std::string escapeSpacing( const QString & );
+  std::string escapeSpacing( QString const & );
 
   /// Find end of corresponding </div> tag
-  int findEndOfCloseDiv( const QString &, int pos );
-  bool isCollapsable( Dictionary::DataRequest & req, const QString & dictId );
+  int findEndOfCloseDiv( QString const &, int pos );
+  bool isCollapsable( Dictionary::DataRequest & req, QString const & dictId );
 };

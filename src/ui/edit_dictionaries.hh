@@ -57,7 +57,7 @@ private slots:
 
 signals:
 
-  void showDictionaryInfo( const QString & dictId );
+  void showDictionaryInfo( QString const & dictId );
 
   void showDictionaryHeadwords( Dictionary::Class * dict );
 

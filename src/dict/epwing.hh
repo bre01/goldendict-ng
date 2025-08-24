@@ -17,5 +17,5 @@ void addWordToChunks( Epwing::Book::EpwingHeadword & head,
                       int & articleCount );
 
 vector< sptr< Dictionary::Class > >
-makeDictionaries( const vector< string > & fileNames, const string & indicesDir, Dictionary::Initializing & );
+makeDictionaries( vector< string > const & fileNames, string const & indicesDir, Dictionary::Initializing & );
 } // namespace Epwing

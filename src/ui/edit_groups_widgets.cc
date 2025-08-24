@@ -10,6 +10,7 @@
 #include "metadata.hh"
 #include "utils.hh"
 
+#include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QIcon>
@@ -25,8 +26,8 @@ using std::vector;
 /// DictGroupWidget
 
 DictGroupWidget::DictGroupWidget( QWidget * parent,
-                                  const vector< sptr< Dictionary::Class > > & dicts,
-                                  const Config::Group & group ):
+                                  vector< sptr< Dictionary::Class > > const & dicts,
+                                  Config::Group const & group ):
   QWidget( parent ),
   groupId( group.id ),
   groupName( group.name )
@@ -143,7 +144,7 @@ Config::Group DictGroupWidget::makeGroup() const
   return g.makeConfigGroup();
 }
 
-void DictGroupWidget::showDictInfo( const QPoint & pos )
+void DictGroupWidget::showDictInfo( QPoint const & pos )
 {
   const QVariant data = ui.dictionaries->getModel()->data( ui.dictionaries->indexAt( pos ), Qt::EditRole );
   QString id;
@@ -152,7 +153,7 @@ void DictGroupWidget::showDictInfo( const QPoint & pos )
   }
 
   if ( !id.isEmpty() ) {
-    const vector< sptr< Dictionary::Class > > & dicts = ui.dictionaries->getCurrentDictionaries();
+    vector< sptr< Dictionary::Class > > const & dicts = ui.dictionaries->getCurrentDictionaries();
     unsigned n;
     for ( n = 0; n < dicts.size(); n++ ) {
       if ( id.compare( QString::fromUtf8( dicts.at( n )->getId().c_str() ) ) == 0 ) {
@@ -165,7 +166,7 @@ void DictGroupWidget::showDictInfo( const QPoint & pos )
   }
 }
 
-void DictGroupWidget::removeCurrentItem( const QModelIndex & index )
+void DictGroupWidget::removeCurrentItem( QModelIndex const & index )
 {
   (void)index;
   ui.dictionaries->getModel()->removeSelectedRows( ui.dictionaries->selectionModel() );
@@ -173,8 +174,8 @@ void DictGroupWidget::removeCurrentItem( const QModelIndex & index )
 
 /// DictListModel
 
-void DictListModel::populate( const std::vector< sptr< Dictionary::Class > > & active,
-                              const std::vector< sptr< Dictionary::Class > > & available )
+void DictListModel::populate( std::vector< sptr< Dictionary::Class > > const & active,
+                              std::vector< sptr< Dictionary::Class > > const & available )
 {
   dictionaries = active;
   allDicts     = &available;
@@ -183,7 +184,7 @@ void DictListModel::populate( const std::vector< sptr< Dictionary::Class > > & a
   endResetModel();
 }
 
-void DictListModel::populate( const std::vector< sptr< Dictionary::Class > > & active )
+void DictListModel::populate( std::vector< sptr< Dictionary::Class > > const & active )
 {
   dictionaries = active;
   beginResetModel();
@@ -195,12 +196,12 @@ void DictListModel::setAsSource()
   isSource = true;
 }
 
-const std::vector< sptr< Dictionary::Class > > & DictListModel::getCurrentDictionaries() const
+std::vector< sptr< Dictionary::Class > > const & DictListModel::getCurrentDictionaries() const
 {
   return dictionaries;
 }
 
-Qt::ItemFlags DictListModel::flags( const QModelIndex & index ) const
+Qt::ItemFlags DictListModel::flags( QModelIndex const & index ) const
 {
   const Qt::ItemFlags defaultFlags = QAbstractListModel::flags( index );
 
@@ -212,18 +213,18 @@ Qt::ItemFlags DictListModel::flags( const QModelIndex & index ) const
   }
 }
 
-int DictListModel::rowCount( const QModelIndex & ) const
+int DictListModel::rowCount( QModelIndex const & ) const
 {
   return dictionaries.size();
 }
 
-QVariant DictListModel::data( const QModelIndex & index, int role ) const
+QVariant DictListModel::data( QModelIndex const & index, int role ) const
 {
   if ( index.row() < 0 ) {
     return QVariant();
   }
 
-  const sptr< Dictionary::Class > & item = dictionaries[ index.row() ];
+  sptr< Dictionary::Class > const & item = dictionaries[ index.row() ];
 
   if ( !item ) {
     return QVariant();
@@ -319,7 +320,7 @@ bool DictListModel::removeRows( int row, int count, const QModelIndex & parent )
   return true;
 }
 
-bool DictListModel::setData( const QModelIndex & index, const QVariant & value, int role )
+bool DictListModel::setData( QModelIndex const & index, const QVariant & value, int role )
 {
   if ( isSource || !allDicts || !index.isValid() || index.row() >= (int)dictionaries.size() ) {
     return false;
@@ -475,13 +476,13 @@ DictListWidget::DictListWidget( QWidget * parent ):
   setDropIndicatorShown( true );
 }
 
-void DictListWidget::populate( const std::vector< sptr< Dictionary::Class > > & active,
-                               const std::vector< sptr< Dictionary::Class > > & available )
+void DictListWidget::populate( std::vector< sptr< Dictionary::Class > > const & active,
+                               std::vector< sptr< Dictionary::Class > > const & available )
 {
   model.populate( active, available );
 }
 
-void DictListWidget::populate( const std::vector< sptr< Dictionary::Class > > & active )
+void DictListWidget::populate( std::vector< sptr< Dictionary::Class > > const & active )
 {
   model.populate( active );
 }
@@ -492,7 +493,7 @@ void DictListWidget::setAsSource()
   model.setAsSource();
 }
 
-const std::vector< sptr< Dictionary::Class > > & DictListWidget::getCurrentDictionaries() const
+std::vector< sptr< Dictionary::Class > > const & DictListWidget::getCurrentDictionaries() const
 {
   return model.getCurrentDictionaries();
 }
@@ -513,7 +514,7 @@ void DictListWidget::focusInEvent( QFocusEvent * )
   emit gotFocus();
 }
 
-void DictListWidget::rowsAboutToBeRemoved( const QModelIndex & parent, int start, int end )
+void DictListWidget::rowsAboutToBeRemoved( QModelIndex const & parent, int start, int end )
 {
   // When removing rows, if the current row is among the removed ones, select
   // an item just before the first row to be removed, if there's one.
@@ -544,9 +545,9 @@ DictGroupsWidget::DictGroupsWidget( QWidget * parent ):
 }
 
 
-void DictGroupsWidget::populate( const Config::Groups & groups,
-                                 const vector< sptr< Dictionary::Class > > & allDicts_,
-                                 const vector< sptr< Dictionary::Class > > & activeDicts_ )
+void DictGroupsWidget::populate( Config::Groups const & groups,
+                                 vector< sptr< Dictionary::Class > > const & allDicts_,
+                                 vector< sptr< Dictionary::Class > > const & activeDicts_ )
 {
   removeAllGroups();
 
@@ -638,7 +639,7 @@ QItemSelectionModel * DictGroupsWidget::getCurrentSelectionModel() const
 }
 
 
-int DictGroupsWidget::addNewGroup( const QString & name )
+int DictGroupsWidget::addNewGroup( QString const & name )
 {
   if ( !allDicts ) {
     return 0;
@@ -715,9 +716,9 @@ void DictGroupsWidget::addAutoGroups()
     else if ( !dict->getDictionaryFilenames().empty() ) {
       // Handle special case - morphology dictionaries
 
-      const QString fileName = QFileInfo( dict->getDictionaryFilenames()[ 0 ].c_str() ).fileName();
+      QString const fileName = QFileInfo( dict->getDictionaryFilenames()[ 0 ].c_str() ).fileName();
       if ( fileName.endsWith( ".aff", Qt::CaseInsensitive ) ) {
-        const QString code = fileName.left( 2 ).toLower();
+        QString const code = fileName.left( 2 ).toLower();
         morphoMap[ code ].push_back( dict );
         continue;
       }
@@ -726,7 +727,7 @@ void DictGroupsWidget::addAutoGroups()
     dictMap[ name ].push_back( dict );
   }
 
-  const QStringList groupList = dictMap.keys();
+  QStringList const groupList = dictMap.keys();
 
   // Insert morphology dictionaries into corresponding lists
   for ( const auto & gr : groupList ) {
@@ -742,7 +743,7 @@ void DictGroupsWidget::addAutoGroups()
     const auto idx = addUniqueGroup( gr );
 
     // add dictionaries into the current group
-    const QList< sptr< Dictionary::Class > > vd = dictMap[ gr ];
+    QList< sptr< Dictionary::Class > > const vd = dictMap[ gr ];
     DictListModel * model                       = getModelAt( idx );
     if ( !model ) {
       continue;
@@ -836,7 +837,7 @@ void DictGroupsWidget::addAutoGroupsByFolders()
       groupName = path.dirName();
     }
     else {
-      const QString directFolder = path.dirName();
+      QString const directFolder = path.dirName();
       if ( !path.cdUp() ) {
         cdUpWentWrong( path.absolutePath() );
         return;
@@ -921,7 +922,7 @@ QString DictGroupsWidget::getCurrentGroupName() const
   return {};
 }
 
-void DictGroupsWidget::renameCurrentGroup( const QString & name )
+void DictGroupsWidget::renameCurrentGroup( QString const & name )
 {
   const int current = currentIndex();
 
@@ -956,7 +957,7 @@ void DictGroupsWidget::combineGroups( int source, int target )
     return;
   }
 
-  const vector< sptr< Dictionary::Class > > & dicts = getDictionaryAt( source );
+  vector< sptr< Dictionary::Class > > const & dicts = getDictionaryAt( source );
 
   const auto model = getModelAt( target );
 
@@ -976,7 +977,7 @@ void DictGroupsWidget::combineGroups( int source, int target )
   setTabToolTip( target, toolTipStr );
 }
 
-void DictGroupsWidget::contextMenu( const QPoint & pos )
+void DictGroupsWidget::contextMenu( QPoint const & pos )
 {
   const int clickedGroup = tabBar()->tabAt( pos );
   if ( clickedGroup < 0 ) {
@@ -1009,7 +1010,7 @@ void DictGroupsWidget::contextMenu( const QPoint & pos )
   combineTargetAction->setEnabled( false );
 
   for ( int i = 0; i < count(); i++ ) {
-    const QString str = tabText( i );
+    QString const str = tabText( i );
     if ( i != clickedGroup && str.length() == 7 && str.mid( 2, 3 ) == " - " && str.endsWith( grRight ) ) {
       combineTargetAction->setEnabled( true );
       break;
@@ -1106,7 +1107,7 @@ void DictGroupsWidget::contextMenu( const QPoint & pos )
     setCurrentIndex( targetGroup );
   }
   else if ( result && ( result == combineFirstAction || result == combineSecondAction ) ) {
-    const QString & grBase = result == combineFirstAction ? grLeft : grRight;
+    QString const & grBase = result == combineFirstAction ? grLeft : grRight;
     targetGroup            = addUniqueGroup( grBase );
 
     for ( int i = 0; i < count(); i++ ) {
@@ -1160,7 +1161,7 @@ void QuickFilterLine::applyTo( QAbstractItemView * source )
   source->setModel( &m_proxyModel );
 }
 
-QModelIndex QuickFilterLine::mapToSource( const QModelIndex & idx )
+QModelIndex QuickFilterLine::mapToSource( QModelIndex const & idx )
 {
   if ( &m_proxyModel == idx.model() ) {
     return m_proxyModel.mapToSource( idx );

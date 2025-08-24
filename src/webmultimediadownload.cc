@@ -1,4 +1,5 @@
 #include "webmultimediadownload.hh"
+#include "filetype.hh"
 
 namespace Dictionary {
 

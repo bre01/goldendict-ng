@@ -53,7 +53,7 @@ bool ArticleWebView::event( QEvent * event )
   return QWebEngineView::event( event );
 }
 
-void ArticleWebView::linkClickedInHtml( const QUrl & )
+void ArticleWebView::linkClickedInHtml( QUrl const & )
 {
   //disable single click to simulate dbclick action on the new loaded pages.
   singleClickToDbClick = false;

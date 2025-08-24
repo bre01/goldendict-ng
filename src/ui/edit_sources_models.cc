@@ -11,7 +11,7 @@
 #endif
 
 
-Sources::Sources( QWidget * parent, const Config::Class & cfg ):
+Sources::Sources( QWidget * parent, Config::Class const & cfg ):
   QWidget( parent ),
 #ifdef MAKE_CHINESE_CONVERSION_SUPPORT
   chineseConversion( new ChineseConversion( this, cfg.transliteration.chinese ) ),
@@ -31,11 +31,11 @@ Sources::Sources( QWidget * parent, const Config::Class & cfg ):
 {
   ui.setupUi( this );
 
-  const Config::Hunspell & hunspell   = cfg.hunspell;
-  const Config::Transliteration & trs = cfg.transliteration;
+  Config::Hunspell const & hunspell   = cfg.hunspell;
+  Config::Transliteration const & trs = cfg.transliteration;
 
-  const Config::Lingua & lingua = cfg.lingua;
-  const Config::Forvo & forvo   = cfg.forvo;
+  Config::Lingua const & lingua = cfg.lingua;
+  Config::Forvo const & forvo   = cfg.forvo;
 
   // itemEditorFactory owns the ProgramTypeEditor
   itemEditorFactory->registerEditor( QMetaType::Int, new QStandardItemEditorCreator< ProgramTypeEditor >() );
@@ -49,8 +49,6 @@ Sources::Sources( QWidget * parent, const Config::Class & cfg ):
   ui.mediaWikis->resizeColumnToContents( 2 );
   ui.mediaWikis->resizeColumnToContents( 3 );
   ui.mediaWikis->resizeColumnToContents( 4 );
-  ui.mediaWikis->setSelectionMode( QAbstractItemView::ExtendedSelection );
-  ui.mediaWikis->setSelectionBehavior( QAbstractItemView::SelectRows );
 
   ui.webSites->setTabKeyNavigation( true );
   ui.webSites->setModel( &webSitesModel );
@@ -61,8 +59,6 @@ Sources::Sources( QWidget * parent, const Config::Class & cfg ):
   ui.webSites->resizeColumnToContents( 2 );
   ui.webSites->resizeColumnToContents( 3 );
   ui.webSites->resizeColumnToContents( 4 );
-  ui.webSites->setSelectionMode( QAbstractItemView::ExtendedSelection );
-  ui.webSites->setSelectionBehavior( QAbstractItemView::SelectRows );
 
   ui.dictServers->setTabKeyNavigation( true );
   ui.dictServers->setModel( &dictServersModel );
@@ -72,8 +68,6 @@ Sources::Sources( QWidget * parent, const Config::Class & cfg ):
   ui.dictServers->resizeColumnToContents( 3 );
   ui.dictServers->resizeColumnToContents( 4 );
   ui.dictServers->resizeColumnToContents( 5 );
-  ui.dictServers->setSelectionMode( QAbstractItemView::ExtendedSelection );
-  ui.dictServers->setSelectionBehavior( QAbstractItemView::SelectRows );
 
   ui.programs->setTabKeyNavigation( true );
   ui.programs->setModel( &programsModel );
@@ -87,20 +81,14 @@ Sources::Sources( QWidget * parent, const Config::Class & cfg ):
   ui.programs->resizeColumnToContents( 3 );
   ui.programs->resizeColumnToContents( 4 );
   ui.programs->setItemDelegate( itemDelegate );
-  ui.programs->setSelectionMode( QAbstractItemView::ExtendedSelection );
-  ui.programs->setSelectionBehavior( QAbstractItemView::SelectRows );
 
   ui.paths->setTabKeyNavigation( true );
   ui.paths->setModel( &pathsModel );
-  ui.paths->setSelectionMode( QAbstractItemView::ExtendedSelection );
-  ui.paths->setSelectionBehavior( QAbstractItemView::SelectRows );
 
   fitPathsColumns();
 
   ui.soundDirs->setTabKeyNavigation( true );
   ui.soundDirs->setModel( &soundDirsModel );
-  ui.soundDirs->setSelectionMode( QAbstractItemView::ExtendedSelection );
-  ui.soundDirs->setSelectionBehavior( QAbstractItemView::SelectRows );
 
   fitSoundDirsColumns();
 
@@ -174,23 +162,19 @@ void Sources::on_addPath_clicked()
 
 void Sources::on_removePath_clicked()
 {
-  QModelIndexList selected = ui.paths->selectionModel()->selectedRows();
+  QModelIndex current = ui.paths->currentIndex();
 
-  if ( selected.isEmpty() ) {
-    return;
+  if ( current.isValid()
+       && QMessageBox::question(
+            this,
+            tr( "Confirm removal" ),
+            tr( "Remove directory <b>%1</b> from the list?" ).arg( pathsModel.getCurrentPaths()[ current.row() ].path ),
+            QMessageBox::Ok,
+            QMessageBox::Cancel )
+         == QMessageBox::Ok ) {
+    pathsModel.removePath( current.row() );
+    fitPathsColumns();
   }
-
-  if ( QMessageBox::question( this,
-                              tr( "Confirm removal" ),
-                              tr( "Remove selected directories from the list?" ),
-                              QMessageBox::StandardButtons( QMessageBox::Ok | QMessageBox::Cancel ) )
-       != QMessageBox::Ok ) {
-    return;
-  }
-
-  pathsModel.remove( selected );
-
-  fitPathsColumns();
 }
 
 void Sources::on_addSoundDir_clicked()
@@ -205,20 +189,19 @@ void Sources::on_addSoundDir_clicked()
 
 void Sources::on_removeSoundDir_clicked()
 {
-  QModelIndexList selected = ui.soundDirs->selectionModel()->selectedRows();
-  if ( selected.isEmpty() ) {
-    return;
-  }
+  QModelIndex current = ui.soundDirs->currentIndex();
 
-  if ( QMessageBox::question( this,
-                              tr( "Confirm removal" ),
-                              tr( "Remove %1 directories from the list?" ).arg( selected.size() ),
-                              QMessageBox::Ok | QMessageBox::Cancel )
-       != QMessageBox::Ok ) {
-    return;
+  if ( current.isValid()
+       && QMessageBox::question( this,
+                                 tr( "Confirm removal" ),
+                                 tr( "Remove directory <b>%1</b> from the list?" )
+                                   .arg( soundDirsModel.getCurrentSoundDirs()[ current.row() ].path ),
+                                 QMessageBox::Ok,
+                                 QMessageBox::Cancel )
+         == QMessageBox::Ok ) {
+    soundDirsModel.removeSoundDir( current.row() );
+    fitSoundDirsColumns();
   }
-  soundDirsModel.removeSoundDirs( selected );
-  fitSoundDirsColumns();
 }
 
 void Sources::on_changeHunspellPath_clicked()
@@ -244,20 +227,18 @@ void Sources::on_addMediaWiki_clicked()
 
 void Sources::on_removeMediaWiki_clicked()
 {
-  QModelIndexList selected = ui.mediaWikis->selectionModel()->selectedRows();
-  if ( selected.isEmpty() ) {
-    return;
-  }
+  QModelIndex current = ui.mediaWikis->currentIndex();
 
-  if ( QMessageBox::question( this,
-                              tr( "Confirm removal" ),
-                              tr( "Remove %1 sites from the list?" ).arg( selected.size() ),
-                              QMessageBox::Ok | QMessageBox::Cancel )
-       != QMessageBox::Ok ) {
-    return;
+  if ( current.isValid()
+       && QMessageBox::question(
+            this,
+            tr( "Confirm removal" ),
+            tr( "Remove site <b>%1</b> from the list?" ).arg( mediawikisModel.getCurrentWikis()[ current.row() ].name ),
+            QMessageBox::Ok,
+            QMessageBox::Cancel )
+         == QMessageBox::Ok ) {
+    mediawikisModel.removeWiki( current.row() );
   }
-
-  mediawikisModel.remove( selected );
 }
 
 void Sources::on_addWebSite_clicked()
@@ -272,20 +253,18 @@ void Sources::on_addWebSite_clicked()
 
 void Sources::on_removeWebSite_clicked()
 {
-  QModelIndexList selected = ui.webSites->selectionModel()->selectedRows();
-  if ( selected.isEmpty() ) {
-    return;
-  }
+  QModelIndex current = ui.webSites->currentIndex();
 
-  if ( QMessageBox::question( this,
-                              tr( "Confirm removal" ),
-                              tr( "Remove %1 sites from the list?" ).arg( selected.size() ),
-                              QMessageBox::Ok | QMessageBox::Cancel )
-       != QMessageBox::Ok ) {
-    return;
+  if ( current.isValid()
+       && QMessageBox::question( this,
+                                 tr( "Confirm removal" ),
+                                 tr( "Remove site <b>%1</b> from the list?" )
+                                   .arg( webSitesModel.getCurrentWebSites()[ current.row() ].name ),
+                                 QMessageBox::Ok,
+                                 QMessageBox::Cancel )
+         == QMessageBox::Ok ) {
+    webSitesModel.removeSite( current.row() );
   }
-
-  webSitesModel.remove( selected );
 }
 
 void Sources::on_addDictServer_clicked()
@@ -300,21 +279,18 @@ void Sources::on_addDictServer_clicked()
 
 void Sources::on_removeDictServer_clicked()
 {
-  QModelIndexList selected = ui.dictServers->selectionModel()->selectedRows();
-  if ( selected.isEmpty() ) {
-    return;
-  }
+  QModelIndex current = ui.dictServers->currentIndex();
 
-  if ( QMessageBox::question( this,
-                              tr( "Confirm removal" ),
-                              tr( "Remove %1 servers from the list?" ).arg( selected.size() ),
-                              QMessageBox::Yes | QMessageBox::No,
-                              QMessageBox::No )
-       != QMessageBox::Yes ) {
-    return;
+  if ( current.isValid()
+       && QMessageBox::question( this,
+                                 tr( "Confirm removal" ),
+                                 tr( "Remove site <b>%1</b> from the list?" )
+                                   .arg( dictServersModel.getCurrentDictServers()[ current.row() ].name ),
+                                 QMessageBox::Ok,
+                                 QMessageBox::Cancel )
+         == QMessageBox::Ok ) {
+    dictServersModel.removeServer( current.row() );
   }
-
-  dictServersModel.remove( selected );
 }
 
 void Sources::on_addProgram_clicked()
@@ -329,23 +305,18 @@ void Sources::on_addProgram_clicked()
 
 void Sources::on_removeProgram_clicked()
 {
-  QModelIndexList selected = ui.programs->selectionModel()->selectedRows();
-  if ( selected.isEmpty() ) {
-    return;
+  QModelIndex current = ui.programs->currentIndex();
+
+  if ( current.isValid()
+       && QMessageBox::question( this,
+                                 tr( "Confirm removal" ),
+                                 tr( "Remove program <b>%1</b> from the list?" )
+                                   .arg( programsModel.getCurrentPrograms()[ current.row() ].name ),
+                                 QMessageBox::Ok,
+                                 QMessageBox::Cancel )
+         == QMessageBox::Ok ) {
+    programsModel.removeProgram( current.row() );
   }
-
-  QString message = tr( "Remove %1 programs from the list?" ).arg( selected.size() );
-
-  if ( QMessageBox::question( this,
-                              tr( "Confirm removal" ),
-                              message,
-                              QMessageBox::Yes | QMessageBox::No,
-                              QMessageBox::No )
-       != QMessageBox::Yes ) {
-    return;
-  }
-
-  programsModel.remove( selected );
 }
 
 #ifdef TTS_SUPPORT
@@ -378,9 +349,9 @@ Config::Transliteration Sources::getTransliteration() const
 #ifdef MAKE_CHINESE_CONVERSION_SUPPORT
   chineseConversion->getConfig( tr.chinese );
 #endif
-  tr.romaji.enable         = ui.enableRomaji->isChecked();
-  tr.romaji.enableHiragana = ui.enableHiragana->isChecked();
-  tr.romaji.enableKatakana = ui.enableKatakana->isChecked();
+  tr.romaji.enable            = ui.enableRomaji->isChecked();
+  tr.romaji.enableHiragana    = ui.enableHiragana->isChecked();
+  tr.romaji.enableKatakana    = ui.enableKatakana->isChecked();
 
   tr.customTrans.enable  = ui.enableCustomTransliteration->isChecked();
   tr.customTrans.context = ui.customTransliteration->toPlainText();
@@ -412,7 +383,7 @@ Config::Forvo Sources::getForvo() const
 
 ////////// MediaWikisModel
 
-MediaWikisModel::MediaWikisModel( QWidget * parent, const Config::MediaWikis & mediawikis_ ):
+MediaWikisModel::MediaWikisModel( QWidget * parent, Config::MediaWikis const & mediawikis_ ):
   QAbstractTableModel( parent ),
   mediawikis( mediawikis_ )
 {
@@ -441,28 +412,8 @@ void MediaWikisModel::addNewWiki()
   endInsertRows();
 }
 
-void MediaWikisModel::remove( const QModelIndexList & indexes )
-{
-  beginResetModel();
-  QList< qsizetype > rows;
-  rows.reserve( indexes.size() );
 
-  for ( auto & i : std::as_const( indexes ) ) {
-    rows.push_back( i.row() );
-  }
-
-  decltype( mediawikis ) newSoundDirs;
-  for ( auto i = 0; i < mediawikis.size(); ++i ) {
-    if ( !rows.contains( i ) ) {
-      newSoundDirs.push_back( mediawikis[ i ] );
-    }
-  }
-  mediawikis.swap( newSoundDirs );
-  endResetModel();
-}
-
-
-Qt::ItemFlags MediaWikisModel::flags( const QModelIndex & index ) const
+Qt::ItemFlags MediaWikisModel::flags( QModelIndex const & index ) const
 {
   Qt::ItemFlags result = QAbstractTableModel::flags( index );
 
@@ -478,7 +429,7 @@ Qt::ItemFlags MediaWikisModel::flags( const QModelIndex & index ) const
   return result;
 }
 
-int MediaWikisModel::rowCount( const QModelIndex & parent ) const
+int MediaWikisModel::rowCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -488,7 +439,7 @@ int MediaWikisModel::rowCount( const QModelIndex & parent ) const
   }
 }
 
-int MediaWikisModel::columnCount( const QModelIndex & parent ) const
+int MediaWikisModel::columnCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -520,7 +471,7 @@ QVariant MediaWikisModel::headerData( int section, Qt::Orientation /*orientation
   return QVariant();
 }
 
-QVariant MediaWikisModel::data( const QModelIndex & index, int role ) const
+QVariant MediaWikisModel::data( QModelIndex const & index, int role ) const
 {
   if ( index.row() >= mediawikis.size() ) {
     return QVariant();
@@ -548,7 +499,7 @@ QVariant MediaWikisModel::data( const QModelIndex & index, int role ) const
   return QVariant();
 }
 
-bool MediaWikisModel::setData( const QModelIndex & index, const QVariant & value, int role )
+bool MediaWikisModel::setData( QModelIndex const & index, const QVariant & value, int role )
 {
   if ( index.row() >= mediawikis.size() ) {
     return false;
@@ -594,7 +545,7 @@ bool MediaWikisModel::setData( const QModelIndex & index, const QVariant & value
 
 ////////// WebSitesModel
 
-WebSitesModel::WebSitesModel( QWidget * parent, const Config::WebSites & webSites_ ):
+WebSitesModel::WebSitesModel( QWidget * parent, Config::WebSites const & webSites_ ):
   QAbstractTableModel( parent ),
   webSites( webSites_ )
 {
@@ -623,28 +574,8 @@ void WebSitesModel::addNewSite()
   endInsertRows();
 }
 
-void WebSitesModel::remove( const QModelIndexList & indexes )
-{
-  beginResetModel();
-  QList< qsizetype > rows;
-  rows.reserve( indexes.size() );
 
-  for ( auto & i : std::as_const( indexes ) ) {
-    rows.push_back( i.row() );
-  }
-
-  decltype( webSites ) newSoundDirs;
-  for ( auto i = 0; i < webSites.size(); ++i ) {
-    if ( !rows.contains( i ) ) {
-      newSoundDirs.push_back( webSites[ i ] );
-    }
-  }
-  webSites.swap( newSoundDirs );
-  endResetModel();
-}
-
-
-Qt::ItemFlags WebSitesModel::flags( const QModelIndex & index ) const
+Qt::ItemFlags WebSitesModel::flags( QModelIndex const & index ) const
 {
   Qt::ItemFlags result = QAbstractTableModel::flags( index );
 
@@ -660,7 +591,7 @@ Qt::ItemFlags WebSitesModel::flags( const QModelIndex & index ) const
   return result;
 }
 
-int WebSitesModel::rowCount( const QModelIndex & parent ) const
+int WebSitesModel::rowCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -670,7 +601,7 @@ int WebSitesModel::rowCount( const QModelIndex & parent ) const
   }
 }
 
-int WebSitesModel::columnCount( const QModelIndex & parent ) const
+int WebSitesModel::columnCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -710,7 +641,7 @@ QVariant WebSitesModel::headerData( int section, Qt::Orientation /*orientation*/
   return QVariant();
 }
 
-QVariant WebSitesModel::data( const QModelIndex & index, int role ) const
+QVariant WebSitesModel::data( QModelIndex const & index, int role ) const
 {
   if ( index.row() >= webSites.size() ) {
     return QVariant();
@@ -748,7 +679,7 @@ QVariant WebSitesModel::data( const QModelIndex & index, int role ) const
   return QVariant();
 }
 
-bool WebSitesModel::setData( const QModelIndex & index, const QVariant & value, int role )
+bool WebSitesModel::setData( QModelIndex const & index, const QVariant & value, int role )
 {
   if ( index.row() >= webSites.size() ) {
     return false;
@@ -796,7 +727,7 @@ bool WebSitesModel::setData( const QModelIndex & index, const QVariant & value, 
 
 ////////// DictServersModel
 
-DictServersModel::DictServersModel( QWidget * parent, const Config::DictServers & dictServers_ ):
+DictServersModel::DictServersModel( QWidget * parent, Config::DictServers const & dictServers_ ):
   QAbstractTableModel( parent ),
   dictServers( dictServers_ )
 {
@@ -823,27 +754,7 @@ void DictServersModel::addNewServer()
   endInsertRows();
 }
 
-void DictServersModel::remove( const QModelIndexList & indexes )
-{
-  beginResetModel();
-  QList< qsizetype > rows;
-  rows.reserve( indexes.size() );
-
-  for ( auto & i : std::as_const( indexes ) ) {
-    rows.push_back( i.row() );
-  }
-
-  decltype( dictServers ) newSoundDirs;
-  for ( auto i = 0; i < dictServers.size(); ++i ) {
-    if ( !rows.contains( i ) ) {
-      newSoundDirs.push_back( dictServers[ i ] );
-    }
-  }
-  dictServers.swap( newSoundDirs );
-  endResetModel();
-}
-
-Qt::ItemFlags DictServersModel::flags( const QModelIndex & index ) const
+Qt::ItemFlags DictServersModel::flags( QModelIndex const & index ) const
 {
   Qt::ItemFlags result = QAbstractTableModel::flags( index );
 
@@ -859,7 +770,7 @@ Qt::ItemFlags DictServersModel::flags( const QModelIndex & index ) const
   return result;
 }
 
-int DictServersModel::rowCount( const QModelIndex & parent ) const
+int DictServersModel::rowCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -869,7 +780,7 @@ int DictServersModel::rowCount( const QModelIndex & parent ) const
   }
 }
 
-int DictServersModel::columnCount( const QModelIndex & parent ) const
+int DictServersModel::columnCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -903,7 +814,7 @@ QVariant DictServersModel::headerData( int section, Qt::Orientation /*orientatio
   return QVariant();
 }
 
-QVariant DictServersModel::data( const QModelIndex & index, int role ) const
+QVariant DictServersModel::data( QModelIndex const & index, int role ) const
 {
   if ( index.row() >= dictServers.size() ) {
     return QVariant();
@@ -941,7 +852,7 @@ QVariant DictServersModel::data( const QModelIndex & index, int role ) const
   return QVariant();
 }
 
-bool DictServersModel::setData( const QModelIndex & index, const QVariant & value, int role )
+bool DictServersModel::setData( QModelIndex const & index, const QVariant & value, int role )
 {
   if ( index.row() >= dictServers.size() ) {
     return false;
@@ -988,7 +899,7 @@ bool DictServersModel::setData( const QModelIndex & index, const QVariant & valu
 
 ////////// ProgramsModel
 
-ProgramsModel::ProgramsModel( QWidget * parent, const Config::Programs & programs_ ):
+ProgramsModel::ProgramsModel( QWidget * parent, Config::Programs const & programs_ ):
   QAbstractTableModel( parent ),
   programs( programs_ )
 {
@@ -1015,27 +926,7 @@ void ProgramsModel::addNewProgram()
   endInsertRows();
 }
 
-void ProgramsModel::remove( const QModelIndexList & indexes )
-{
-  beginResetModel();
-  QList< qsizetype > rows;
-  rows.reserve( indexes.size() );
-
-  for ( auto & i : std::as_const( indexes ) ) {
-    rows.push_back( i.row() );
-  }
-
-  decltype( programs ) newSoundDirs;
-  for ( auto i = 0; i < programs.size(); ++i ) {
-    if ( !rows.contains( i ) ) {
-      newSoundDirs.push_back( programs[ i ] );
-    }
-  }
-  programs.swap( newSoundDirs );
-  endResetModel();
-}
-
-Qt::ItemFlags ProgramsModel::flags( const QModelIndex & index ) const
+Qt::ItemFlags ProgramsModel::flags( QModelIndex const & index ) const
 {
   Qt::ItemFlags result = QAbstractTableModel::flags( index );
 
@@ -1051,7 +942,7 @@ Qt::ItemFlags ProgramsModel::flags( const QModelIndex & index ) const
   return result;
 }
 
-int ProgramsModel::rowCount( const QModelIndex & parent ) const
+int ProgramsModel::rowCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -1061,7 +952,7 @@ int ProgramsModel::rowCount( const QModelIndex & parent ) const
   }
 }
 
-int ProgramsModel::columnCount( const QModelIndex & parent ) const
+int ProgramsModel::columnCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -1093,7 +984,7 @@ QVariant ProgramsModel::headerData( int section, Qt::Orientation /*orientation*/
   return QVariant();
 }
 
-QVariant ProgramsModel::data( const QModelIndex & index, int role ) const
+QVariant ProgramsModel::data( QModelIndex const & index, int role ) const
 {
   if ( index.row() >= programs.size() ) {
     return QVariant();
@@ -1126,7 +1017,7 @@ QVariant ProgramsModel::data( const QModelIndex & index, int role ) const
   return QVariant();
 }
 
-bool ProgramsModel::setData( const QModelIndex & index, const QVariant & value, int role )
+bool ProgramsModel::setData( QModelIndex const & index, const QVariant & value, int role )
 {
   if ( index.row() >= programs.size() ) {
     return false;
@@ -1201,7 +1092,7 @@ void ProgramTypeEditor::setType( int t )
 
 ////////// PathsModel
 
-PathsModel::PathsModel( QWidget * parent, const Config::Paths & paths_ ):
+PathsModel::PathsModel( QWidget * parent, Config::Paths const & paths_ ):
   QAbstractTableModel( parent ),
   paths( paths_ )
 {
@@ -1214,34 +1105,14 @@ void PathsModel::removePath( int index )
   endRemoveRows();
 }
 
-void PathsModel::addNewPath( const QString & path )
+void PathsModel::addNewPath( QString const & path )
 {
   beginInsertRows( QModelIndex(), paths.size(), paths.size() );
   paths.push_back( Config::Path( path, false ) );
   endInsertRows();
 }
 
-void PathsModel::remove( const QModelIndexList & indexes )
-{
-  beginResetModel();
-  QList< qsizetype > rows;
-  rows.reserve( indexes.size() );
-
-  for ( auto & i : std::as_const( indexes ) ) {
-    rows.push_back( i.row() );
-  }
-
-  decltype( paths ) newSoundDirs;
-  for ( auto i = 0; i < paths.size(); ++i ) {
-    if ( !rows.contains( i ) ) {
-      newSoundDirs.push_back( paths[ i ] );
-    }
-  }
-  paths.swap( newSoundDirs );
-  endResetModel();
-}
-
-Qt::ItemFlags PathsModel::flags( const QModelIndex & index ) const
+Qt::ItemFlags PathsModel::flags( QModelIndex const & index ) const
 {
   Qt::ItemFlags result = QAbstractTableModel::flags( index );
 
@@ -1259,7 +1130,7 @@ Qt::ItemFlags PathsModel::flags( const QModelIndex & index ) const
   return result;
 }
 
-int PathsModel::rowCount( const QModelIndex & parent ) const
+int PathsModel::rowCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -1269,7 +1140,7 @@ int PathsModel::rowCount( const QModelIndex & parent ) const
   }
 }
 
-int PathsModel::columnCount( const QModelIndex & parent ) const
+int PathsModel::columnCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -1295,7 +1166,7 @@ QVariant PathsModel::headerData( int section, Qt::Orientation /*orientation*/, i
   return QVariant();
 }
 
-QVariant PathsModel::data( const QModelIndex & index, int role ) const
+QVariant PathsModel::data( QModelIndex const & index, int role ) const
 {
   if ( index.row() >= paths.size() ) {
     return QVariant();
@@ -1312,7 +1183,7 @@ QVariant PathsModel::data( const QModelIndex & index, int role ) const
   return QVariant();
 }
 
-bool PathsModel::setData( const QModelIndex & index, const QVariant & /*value*/, int role )
+bool PathsModel::setData( QModelIndex const & index, const QVariant & /*value*/, int role )
 {
   if ( index.row() >= paths.size() ) {
     return false;
@@ -1331,7 +1202,7 @@ bool PathsModel::setData( const QModelIndex & index, const QVariant & /*value*/,
 
 ////////// SoundDirsModel
 
-SoundDirsModel::SoundDirsModel( QWidget * parent, const Config::SoundDirs & soundDirs_ ):
+SoundDirsModel::SoundDirsModel( QWidget * parent, Config::SoundDirs const & soundDirs_ ):
   QAbstractTableModel( parent ),
   soundDirs( soundDirs_ )
 {
@@ -1344,34 +1215,14 @@ void SoundDirsModel::removeSoundDir( int index )
   endRemoveRows();
 }
 
-void SoundDirsModel::addNewSoundDir( const QString & path, const QString & name )
+void SoundDirsModel::addNewSoundDir( QString const & path, QString const & name )
 {
   beginInsertRows( QModelIndex(), soundDirs.size(), soundDirs.size() );
   soundDirs.push_back( Config::SoundDir( path, name ) );
   endInsertRows();
 }
 
-void SoundDirsModel::removeSoundDirs( const QList< QModelIndex > & indexes )
-{
-  beginResetModel();
-  QList< qsizetype > rows;
-  rows.reserve( indexes.size() );
-
-  for ( auto & i : std::as_const( indexes ) ) {
-    rows.push_back( i.row() );
-  }
-
-  decltype( soundDirs ) newSoundDirs;
-  for ( auto i = 0; i < soundDirs.size(); ++i ) {
-    if ( !rows.contains( i ) ) {
-      newSoundDirs.push_back( soundDirs[ i ] );
-    }
-  }
-  soundDirs.swap( newSoundDirs );
-  endResetModel();
-}
-
-Qt::ItemFlags SoundDirsModel::flags( const QModelIndex & index ) const
+Qt::ItemFlags SoundDirsModel::flags( QModelIndex const & index ) const
 {
   Qt::ItemFlags result = QAbstractTableModel::flags( index );
 
@@ -1382,7 +1233,7 @@ Qt::ItemFlags SoundDirsModel::flags( const QModelIndex & index ) const
   return result;
 }
 
-int SoundDirsModel::rowCount( const QModelIndex & parent ) const
+int SoundDirsModel::rowCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -1392,7 +1243,7 @@ int SoundDirsModel::rowCount( const QModelIndex & parent ) const
   }
 }
 
-int SoundDirsModel::columnCount( const QModelIndex & parent ) const
+int SoundDirsModel::columnCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -1420,7 +1271,7 @@ QVariant SoundDirsModel::headerData( int section, Qt::Orientation /*orientation*
   return QVariant();
 }
 
-QVariant SoundDirsModel::data( const QModelIndex & index, int role ) const
+QVariant SoundDirsModel::data( QModelIndex const & index, int role ) const
 {
   if ( index.row() >= soundDirs.size() ) {
     return QVariant();
@@ -1441,7 +1292,7 @@ QVariant SoundDirsModel::data( const QModelIndex & index, int role ) const
   return QVariant();
 }
 
-bool SoundDirsModel::setData( const QModelIndex & index, const QVariant & value, int role )
+bool SoundDirsModel::setData( QModelIndex const & index, const QVariant & value, int role )
 {
   if ( index.row() >= soundDirs.size() ) {
     return false;
@@ -1468,21 +1319,21 @@ bool SoundDirsModel::setData( const QModelIndex & index, const QVariant & value,
 
 ////////// HunspellDictsModel
 
-HunspellDictsModel::HunspellDictsModel( QWidget * parent, const Config::Hunspell & hunspell ):
+HunspellDictsModel::HunspellDictsModel( QWidget * parent, Config::Hunspell const & hunspell ):
   QAbstractTableModel( parent ),
   enabledDictionaries( hunspell.enabledDictionaries )
 {
   changePath( hunspell.dictionariesPath );
 }
 
-void HunspellDictsModel::changePath( const QString & newPath )
+void HunspellDictsModel::changePath( QString const & newPath )
 {
   dataFiles = HunspellMorpho::findDataFiles( newPath );
   beginResetModel();
   endResetModel();
 }
 
-Qt::ItemFlags HunspellDictsModel::flags( const QModelIndex & index ) const
+Qt::ItemFlags HunspellDictsModel::flags( QModelIndex const & index ) const
 {
   Qt::ItemFlags result = QAbstractTableModel::flags( index );
 
@@ -1495,7 +1346,7 @@ Qt::ItemFlags HunspellDictsModel::flags( const QModelIndex & index ) const
   return result;
 }
 
-int HunspellDictsModel::rowCount( const QModelIndex & parent ) const
+int HunspellDictsModel::rowCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -1505,7 +1356,7 @@ int HunspellDictsModel::rowCount( const QModelIndex & parent ) const
   }
 }
 
-int HunspellDictsModel::columnCount( const QModelIndex & parent ) const
+int HunspellDictsModel::columnCount( QModelIndex const & parent ) const
 {
   if ( parent.isValid() ) {
     return 0;
@@ -1531,7 +1382,7 @@ QVariant HunspellDictsModel::headerData( int section, Qt::Orientation /*orientat
   return QVariant();
 }
 
-QVariant HunspellDictsModel::data( const QModelIndex & index, int role ) const
+QVariant HunspellDictsModel::data( QModelIndex const & index, int role ) const
 {
   if ( (unsigned)index.row() >= dataFiles.size() ) {
     return QVariant();
@@ -1554,7 +1405,7 @@ QVariant HunspellDictsModel::data( const QModelIndex & index, int role ) const
   return QVariant();
 }
 
-bool HunspellDictsModel::setData( const QModelIndex & index, const QVariant & /*value*/, int role )
+bool HunspellDictsModel::setData( QModelIndex const & index, const QVariant & /*value*/, int role )
 {
   if ( (unsigned)index.row() >= dataFiles.size() ) {
     return false;

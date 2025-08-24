@@ -1,6 +1,8 @@
 /* This file is (c) 2014 Abs62
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 #ifndef __APPLE__
+  #include <QTouchEvent>
+  #include <QSwipeGesture>
   #include <QVariant>
   #include <math.h>
   #include "ui/articleview.hh"

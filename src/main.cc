@@ -7,34 +7,27 @@
 #include "version.hh"
 #include <QByteArray>
 #include <QCommandLineParser>
+#include <QDesktopServices>
 #include <QFile>
 #include <QIcon>
 #include <QMessageBox>
+#include <QMutex>
 #include <QSessionManager>
 #include <QString>
 #include <QtWebEngineCore/QWebEngineUrlScheme>
 #include <stdio.h>
+#include <QStyleFactory>
 #if defined( Q_OS_UNIX )
+  #include <clocale>
   #include "unix/ksignalhandler.hh"
 #endif
 
 #ifdef Q_OS_MACOS
   #include "macos/mac_url_handler.hh"
-  #include <QDesktopServices>
 #endif
 
 #ifdef Q_OS_WIN32
   #include <windows.h>
-  #include <QStyleFactory>
-#endif
-
-
-#ifdef Q_OS_WIN
-  #include "hotkey/winhotkeyapplication.hh"
-using GD_QApplication = QHotkeyApplication;
-#else
-  #include "qtsingleapplication.h"
-using GD_QApplication = QtSingleApplication;
 #endif
 
 #if defined( USE_BREAKPAD )
@@ -242,7 +235,7 @@ void processCommandLine( QCoreApplication * app, GDOptions * result )
 
 int main( int argc, char ** argv )
 {
-#if defined( WITH_X11 )
+#if defined( Q_OS_UNIX ) && !defined( Q_OS_MACOS )
   // GoldenDict use lots of X11 functions and it currently cannot work
   // natively on Wayland. This workaround will force GoldenDict to use
   // XWayland.
@@ -281,19 +274,18 @@ int main( int argc, char ** argv )
   }
   QApplication::setHighDpiScaleFactorRoundingPolicy( Qt::HighDpiScaleFactorRoundingPolicy::PassThrough );
 
-  GD_QApplication app( "GoldenDict-ng", argc, argv );
+  QHotkeyApplication app( "GoldenDict-ng", argc, argv );
 
-  app.setDesktopFileName( "io.github.xiaoyifang.goldendict_ng" );
-  GD_QApplication::setApplicationName( "GoldenDict-ng" );
-  GD_QApplication::setOrganizationDomain( "xiaoyifang.github.io" );
+  QHotkeyApplication::setApplicationName( "GoldenDict-ng" );
+  QHotkeyApplication::setOrganizationDomain( "https://github.com/xiaoyifang/goldendict-ng" );
 #ifndef Q_OS_MACOS
   // macOS icon is defined in Info.plist
-  GD_QApplication::setWindowIcon( QIcon( ":/icons/programicon.png" ) );
+  QHotkeyApplication::setWindowIcon( QIcon( ":/icons/programicon.png" ) );
 #endif
 
 #ifdef Q_OS_WIN
   // TODO: Force fusion because Qt6.7's "ModernStyle"'s dark theme have problems, need to test / reconsider in future
-  GD_QApplication::setStyle( QStyleFactory::create( "WindowsVista" ) );
+  QHotkeyApplication::setStyle( QStyleFactory::create( "WindowsVista" ) );
 #endif
 
 
@@ -332,18 +324,8 @@ int main( int argc, char ** argv )
 
 #endif
 
-  const QStringList localSchemes = { "gdlookup",
-                                     "gdau",
-                                     "gico",
-                                     "qrcx",
-                                     "bres",
-                                     "bword",
-                                     "gdprg",
-                                     "gdvideo",
-                                     "gdtts",
-                                     "entry",
-                                     "iframe-http",
-                                     "iframe-https" };
+  const QStringList localSchemes =
+    { "gdlookup", "gdau", "gico", "qrcx", "bres", "bword", "gdprg", "gdvideo", "gdtts", "ifr", "entry" };
 
   for ( const auto & localScheme : localSchemes ) {
     QWebEngineUrlScheme webUiScheme( localScheme.toLatin1() );
@@ -398,6 +380,9 @@ int main( int argc, char ** argv )
   QDir::setCurrent( Config::getProgramDataDir() );
 #endif
 
+  // Load translations for system locale
+  QString localeName = QLocale::system().name();
+
   Config::Class cfg;
   for ( ;; ) {
     try {
@@ -406,8 +391,8 @@ int main( int argc, char ** argv )
     catch ( Config::exError & ) {
       QMessageBox mb(
         QMessageBox::Warning,
-        GD_QApplication::applicationName(),
-        GD_QApplication::translate( "Main", "Error in configuration file. Continue with default settings?" ),
+        QHotkeyApplication::applicationName(),
+        QHotkeyApplication::translate( "Main", "Error in configuration file. Continue with default settings?" ),
         QMessageBox::Yes | QMessageBox::No );
       mb.exec();
       if ( mb.result() != QMessageBox::Yes ) {
@@ -438,15 +423,13 @@ int main( int argc, char ** argv )
 
   //System Font
   auto font = QApplication::font();
-  if ( cfg.preferences.enableInterfaceFont && !cfg.preferences.interfaceFont.isEmpty()
-       && font.family() != cfg.preferences.interfaceFont ) {
+  if ( !cfg.preferences.interfaceFont.isEmpty() && font.family() != cfg.preferences.interfaceFont ) {
     font.setFamily( cfg.preferences.interfaceFont );
     QApplication::setFont( font );
   }
 
   //system font size
-  if ( cfg.preferences.enableInterfaceFont && cfg.preferences.interfaceFontSize >= 8
-       && cfg.preferences.interfaceFontSize <= 32 ) {
+  if ( cfg.preferences.interfaceFontSize >= 8 && cfg.preferences.interfaceFontSize <= 32 ) {
     font.setPixelSize( cfg.preferences.interfaceFontSize );
     QApplication::setFont( font );
   }
@@ -481,10 +464,10 @@ int main( int argc, char ** argv )
     auto * webengine_ts = new QTranslator( &app );
 
     // For GD's translations,
-    // If interfaceLanguage is explicitly set, uses filename-based loading, because GD have more languages than Qt & its locale database.
-    // If not, then let Qt's qlocale mechanism decide which one to use, because "locale" handling is different in all 3 platforms, and we don't want to deal with that.
-
-    // Only load qt & webengine translators if GD's translation loading succeeds to avoid inconsistency
+    // If interfaceLanguage is explictly set, uses filename based loading, because QLocale sometimes doesn't match GD's translation file name
+    // Only load qt & webengine translators if GD's translation loading succeed to avoid inconsistency
+    // TODO: The QLocale based method sometimes does not work https://github.com/xiaoyifang/goldendict-ng/issues/2120
+    // GD's locale names may mismatch system locale and the return of default QLocale().name() is slightly different across platforms.
     if ( cfg.preferences.interfaceLanguage.isEmpty() ?
            loadTranslation_qlocale( *gd_ts, QString(), QString(), Config::getLocDir() ) :
            gd_ts->load( cfg.preferences.interfaceLanguage, Config::getLocDir() ) ) {
@@ -496,8 +479,9 @@ int main( int argc, char ** argv )
       // For Windows, windeployqt will combine multiple qt modules translations into `qt_*` thus no `qtwebengine_*` exists
       // qtwebengine loading will fail on Windows.
 
+      // TODO: Some `langauge`s in GD's ts uses - instead of _
       if ( loadTranslation_qlocale( *qt_ts, "qt", "_", QLibraryInfo::path( QLibraryInfo::TranslationsPath ) )
-           && qt_ts->language().startsWith( gd_ts->language().first( 2 ) ) ) { // Don't delete this sanity check.
+           && qt_ts->language() == gd_ts->language().replace( '-', '_' ) ) {
         QCoreApplication::installTranslator( qt_ts );
       }
 
@@ -505,7 +489,7 @@ int main( int argc, char ** argv )
                                     "qtwebengine",
                                     "_",
                                     QLibraryInfo::path( QLibraryInfo::TranslationsPath ) )
-           && webengine_ts->language().startsWith( gd_ts->language().first( 2 ) ) ) {
+           && webengine_ts->language() == gd_ts->language().replace( '-', '_' ) ) {
         QCoreApplication::installTranslator( webengine_ts );
       }
     }

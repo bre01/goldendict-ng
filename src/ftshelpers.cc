@@ -6,6 +6,7 @@
 #include "fulltextsearch.hh"
 #include "ftshelpers.hh"
 #include "dictfile.hh"
+#include "folding.hh"
 #include "utils.hh"
 
 #include <vector>
@@ -23,11 +24,11 @@ const static std::string finish_mark = std::string( "dehsinif" );
 bool ftsIndexIsOldOrBad( BtreeIndexing::BtreeDictionary * dict )
 {
   try {
-    const Xapian::WritableDatabase db( dict->ftsIndexName() );
+    Xapian::WritableDatabase const db( dict->ftsIndexName() );
     auto docid    = db.get_lastdocid();
     auto document = db.get_document( docid );
 
-    const string lastDoc = document.get_data();
+    string const lastDoc = document.get_data();
     return lastDoc != finish_mark;
     //use a special document to mark the end of the index.
   }
@@ -44,7 +45,7 @@ bool ftsIndexIsOldOrBad( BtreeIndexing::BtreeDictionary * dict )
 
 void makeFTSIndex( BtreeIndexing::BtreeDictionary * dict, QAtomicInt & isCancelled )
 {
-  const QMutexLocker _( &dict->getFtsMutex() );
+  QMutexLocker const _( &dict->getFtsMutex() );
 
   //check the index again.
   if ( dict->haveFTSIndex() ) {
@@ -112,7 +113,7 @@ void makeFTSIndex( BtreeIndexing::BtreeDictionary * dict, QAtomicInt & isCancell
 
     long indexedDoc = 0L;
 
-    for ( const auto & address : offsets ) {
+    for ( auto const & address : offsets ) {
       indexedDoc++;
 
       if ( address == lastAddress && skip ) {

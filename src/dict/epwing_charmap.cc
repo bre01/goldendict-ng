@@ -13,7 +13,7 @@ EpwingCharmap & EpwingCharmap::instance()
   return ec;
 }
 
-QByteArray EpwingCharmap::mapToUtf8( const QString & code )
+QByteArray EpwingCharmap::mapToUtf8( QString const & code )
 {
   if ( charMap.contains( code ) )
     return QString( charMap[ code ] ).toUtf8();
@@ -21,7 +21,7 @@ QByteArray EpwingCharmap::mapToUtf8( const QString & code )
   return QByteArray();
 }
 
-void EpwingCharmap::addEntry( const QString & code, int ch )
+void EpwingCharmap::addEntry( QString const & code, int ch )
 {
   charMap[ code ] = QChar( ch );
 }

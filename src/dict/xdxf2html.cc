@@ -12,11 +12,14 @@
 #include "htmlescape.hh"
 #include "utils.hh"
 #include "xdxf.hh"
+
+#include <QRegularExpression>
+
 #include "globalregex.hh"
 
 namespace Xdxf2Html {
 
-static void fixLink( QDomElement & el, const string & dictId, const char * attrName )
+static void fixLink( QDomElement & el, string const & dictId, const char * attrName )
 {
   QUrl url;
   url.setScheme( "bres" );
@@ -61,9 +64,9 @@ QDomElement fakeElement( QDomDocument & dom )
   return dom.createElement( "b" );
 }
 
-string convert( const string & in,
+string convert( string const & in,
                 DICT_TYPE type,
-                const map< string, string > * pAbrv,
+                map< string, string > const * pAbrv,
                 Dictionary::Class * dictPtr,
                 bool isLogicalFormat,
                 unsigned revisionNumber,
@@ -442,7 +445,7 @@ string convert( const string & in,
           // Replace all spaces with non-breakable ones, since that's how Lingvo shows tooltips
           title.reserve( i->second.size() );
 
-          for ( const char * c = i->second.c_str(); *c; ++c ) {
+          for ( char const * c = i->second.c_str(); *c; ++c ) {
             if ( *c == ' ' || *c == '\t' ) {
               // u00A0 in utf8
               title.push_back( 0xC2 );

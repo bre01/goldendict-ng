@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <QMutex>
+#include <QObject>
 #include <QString>
 #include <QWaitCondition>
 #include <QGuiApplication>
@@ -18,6 +19,7 @@
 #include "langcoder.hh"
 #include "sptr.hh"
 #include "utils.hh"
+#include "text.hh"
 #include <QtGlobal>
 
 /// Abstract dictionary-related stuff
@@ -97,7 +99,7 @@ protected:
   void finish();
 
   /// Sets the error string to be returned by getErrorString().
-  void setErrorString( const QString & );
+  void setErrorString( QString const & );
   QWaitCondition cond;
   // Subclasses should be filling up the 'data' array, locking the mutex when
   // whey work with it.
@@ -124,12 +126,12 @@ struct WordMatch
     weight( 0 )
   {
   }
-  WordMatch( const std::u32string & word_ ):
+  WordMatch( std::u32string const & word_ ):
     word( word_ ),
     weight( 0 )
   {
   }
-  WordMatch( const std::u32string & word_, int weight_ ):
+  WordMatch( std::u32string const & word_, int weight_ ):
     word( word_ ),
     weight( weight_ )
   {
@@ -175,7 +177,7 @@ public:
   }
 
   /// Add match if one is not presented in matches list
-  void addMatch( const WordMatch & match );
+  void addMatch( WordMatch const & match );
 
 protected:
 
@@ -257,7 +259,7 @@ public:
     finish();
   }
 
-  DataRequestInstant( const QString & errorString )
+  DataRequestInstant( QString const & errorString )
   {
     setErrorString( errorString );
     finish();
@@ -311,23 +313,23 @@ protected:
   static int getOptimalIconSize();
 
   /// Try load icon based on the main dict file name
-  [[nodiscard]] bool loadIconFromFileName( const QString & mainDictFileName );
+  [[nodiscard]] bool loadIconFromFileName( QString const & mainDictFileName );
   /// Load an icon using a full image file path
-  bool loadIconFromFilePath( const QString & filename );
+  bool loadIconFromFilePath( QString const & filename );
   /// Generate icon based on a text
-  bool loadIconFromText( const QString & iconUrl, const QString & text );
+  bool loadIconFromText( const QString & iconUrl, QString const & text );
 
-  static QString getAbbrName( const QString & text );
+  static QString getAbbrName( QString const & text );
   static QColor intToFixedColor( int index );
   /// Make css content usable only for articles from this dictionary
-  void isolateCSS( QString & css, const QString & wrapperSelector = QString() );
+  void isolateCSS( QString & css, QString const & wrapperSelector = QString() );
 
 public:
 
   /// Creates a dictionary. The id should be made using
   /// Format::makeDictionaryId(), the dictionaryFiles is the file names the
   /// dictionary consists of.
-  Class( const string & id, const vector< string > & dictionaryFiles );
+  Class( string const & id, vector< string > const & dictionaryFiles );
 
   /// Called once after the dictionary is constructed. Usually called for each
   /// dictionaries once all dictionaries were made. The implementation should
@@ -344,7 +346,7 @@ public:
   }
 
   /// Returns the list of file names the dictionary consists of.
-  const vector< string > & getDictionaryFilenames() noexcept
+  vector< string > const & getDictionaryFilenames() noexcept
   {
     return dictionaryFiles;
   }
@@ -408,7 +410,7 @@ public:
   virtual unsigned long getWordCount() noexcept = 0;
 
   /// Returns the dictionary's icon.
-  virtual const QIcon & getIcon() noexcept;
+  virtual QIcon const & getIcon() noexcept;
 
   /// Returns the dictionary's source language.
   virtual quint32 getLangFrom() const
@@ -427,7 +429,7 @@ public:
   /// prefix results should be added. Not more than maxResults results should
   /// be stored. The whole operation is supposed to be fast, though some
   /// dictionaries, the network ones particularly, may of course be slow.
-  virtual sptr< WordSearchRequest > prefixMatch( const std::u32string &, unsigned long maxResults ) = 0;
+  virtual sptr< WordSearchRequest > prefixMatch( std::u32string const &, unsigned long maxResults ) = 0;
 
   /// Looks up a given word in the dictionary, aiming to find different forms
   /// of the given word by allowing suffix variations. This means allowing words
@@ -438,20 +440,20 @@ public:
   /// in the middle of a phrase got matched should be returned.
   /// The default implementation does nothing, returning an empty result.
   virtual sptr< WordSearchRequest >
-  stemmedMatch( const std::u32string &, unsigned minLength, unsigned maxSuffixVariation, unsigned long maxResults );
+  stemmedMatch( std::u32string const &, unsigned minLength, unsigned maxSuffixVariation, unsigned long maxResults );
 
   /// Finds known headwords for the given word, that is, the words for which
   /// the given word is a synonym. If a dictionary can't perform this operation,
   /// it should leave the default implementation which always returns an empty
   /// result.
-  virtual sptr< WordSearchRequest > findHeadwordsForSynonym( const std::u32string & );
+  virtual sptr< WordSearchRequest > findHeadwordsForSynonym( std::u32string const & );
 
   /// For a given word, provides alternate writings of it which are to be looked
   /// up alongside with it. Transliteration dictionaries implement this. The
   /// default implementation returns an empty list. Note that this function is
   /// supposed to be very fast and simple, and the results are thus returned
   /// synchronously.
-  virtual vector< std::u32string > getAlternateWritings( const std::u32string & ) noexcept;
+  virtual vector< std::u32string > getAlternateWritings( std::u32string const & ) noexcept;
 
   /// Returns a definition for the given word. The definition should
   /// be an html fragment (without html/head/body tags) in an utf8 encoding.
@@ -460,23 +462,23 @@ public:
   /// synonyms for the main word.
   /// context is a dictionary-specific data, currently only used for the
   /// 'Websites' feature.
-  virtual sptr< DataRequest > getArticle( const std::u32string &,
-                                          const vector< std::u32string > & alts,
-                                          const std::u32string & context = std::u32string(),
+  virtual sptr< DataRequest > getArticle( std::u32string const &,
+                                          vector< std::u32string > const & alts,
+                                          std::u32string const & context = std::u32string(),
                                           bool ignoreDiacritics          = false ) = 0;
 
   /// Loads contents of a resource named 'name' into the 'data' vector. This is
   /// usually a picture file referenced in the article or something like that.
   /// The default implementation always returns the non-existing resource
   /// response.
-  virtual sptr< DataRequest > getResource( const string & /*name*/ );
+  virtual sptr< DataRequest > getResource( string const & /*name*/ );
 
   /// Returns a results of full-text search of given string similar getArticle().
   virtual sptr< DataRequest >
-  getSearchResults( const QString & searchString, int searchMode, bool matchCase, bool ignoreDiacritics );
+  getSearchResults( QString const & searchString, int searchMode, bool matchCase, bool ignoreDiacritics );
 
   // Return dictionary description if presented
-  virtual const QString & getDescription();
+  virtual QString const & getDescription();
 
   // Return dictionary main file name
   virtual QString getMainFilename();
@@ -513,7 +515,7 @@ public:
   virtual void makeFTSIndex( QAtomicInt & ) {}
 
   /// Set full-text search parameters
-  virtual void setFTSParameters( const Config::FullTextSearch & ) {}
+  virtual void setFTSParameters( Config::FullTextSearch const & ) {}
 
   /// Retrieve all dictionary headwords
   virtual bool getHeadwords( QStringList & )
@@ -540,8 +542,8 @@ public:
   /// dictionary is being indexed. Since indexing can take some time, this
   /// is useful to show in some kind of a splash screen.
   /// The dictionaryName is in utf8.
-  virtual void indexingDictionary( const string & dictionaryName ) noexcept = 0;
-  virtual void loadingDictionary( const string & dictionaryName ) noexcept  = 0;
+  virtual void indexingDictionary( string const & dictionaryName ) noexcept = 0;
+  virtual void loadingDictionary( string const & dictionaryName ) noexcept  = 0;
 
   virtual ~Initializing() = default;
 };
@@ -551,20 +553,20 @@ public:
 /// hashing the file names. This id should be used to identify dictionary
 /// and for the index file name, if one is needed.
 /// This function is supposed to be used by dictionary implementations.
-string makeDictionaryId( const vector< string > & dictionaryFiles ) noexcept;
+string makeDictionaryId( vector< string > const & dictionaryFiles ) noexcept;
 
 /// Checks if it is needed to regenerate index file based on its timestamp
 /// and the timestamps of the dictionary files. If some files are newer than
 /// the index file, or the index file doesn't exist, returns true. If some
 /// dictionary files don't exist, returns true, too.
 /// This function is supposed to be used by dictionary implementations.
-bool needToRebuildIndex( const vector< string > & dictionaryFiles, const string & indexFile ) noexcept;
+bool needToRebuildIndex( vector< string > const & dictionaryFiles, string const & indexFile ) noexcept;
 
 string getFtsSuffix();
 /// Returns a random dictionary id useful for interactively created
 /// dictionaries.
 QString generateRandomDictionaryId();
 
-QMap< std::string, sptr< Dictionary::Class > > dictToMap( const std::vector< sptr< Dictionary::Class > > & dicts );
+QMap< std::string, sptr< Dictionary::Class > > dictToMap( std::vector< sptr< Dictionary::Class > > const & dicts );
 
 } // namespace Dictionary

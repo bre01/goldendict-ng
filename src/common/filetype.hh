@@ -11,22 +11,22 @@ namespace Filetype {
 using std::string;
 
 /// Removes any trailing or leading spaces and may lowercases the string.
-string simplifyString( const string & str, bool lowercase = true );
+string simplifyString( string const & str, bool lowercase = true );
 /// Returns true if the name resembles the one of a sound file (i.e. ends
 /// with .wav, .ogg and such).
-bool isNameOfSound( const string & );
+bool isNameOfSound( string const & );
 /// Returns true if the name resembles the one of a video file (i.e. ends
 /// with .mpg, .ogv and such).
-bool isNameOfVideo( const string & );
+bool isNameOfVideo( string const & );
 /// Returns true if the name resembles the one of a picture file (i.e. ends
 /// with .jpg, .png and such).
-bool isNameOfPicture( const string & );
+bool isNameOfPicture( string const & );
 /// Returns true if the name resembles the one of a .tiff file (i.e. ends
 /// with .tif or tiff). We have this one separately since we need to reconvert
-bool isNameOfTiff( const string & );
+bool isNameOfTiff( string const & );
 /// Returns true if the name resembles the one of a .css file
-bool isNameOfCSS( const string & );
+bool isNameOfCSS( string const & );
 /// Returns true if the name resembles the one of a .svg file
-bool isNameOfSvg( const string & name );
+bool isNameOfSvg( string const & name );
 
 } // namespace Filetype

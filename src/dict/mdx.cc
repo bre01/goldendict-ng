@@ -6,6 +6,7 @@
 #include "folding.hh"
 #include "text.hh"
 #include "dictfile.hh"
+#include "text.hh"
 #include "chunkedstorage.hh"
 #include "langcoder.hh"
 #include "audiolink.hh"
@@ -26,9 +27,9 @@
 #include <QDir>
 #include <QRegularExpression>
 #include <QString>
+#include <QStringBuilder>
 #include <QThreadPool>
 #include <QtConcurrentRun>
-#include <QStringBuilder>
 
 namespace Mdx {
 
@@ -125,7 +126,7 @@ public:
 
   /// Checks whether the given file exists in the mdd file or not.
   /// Note that this function is thread-safe, since it does not access mdd file.
-  bool hasFile( const std::u32string & name )
+  bool hasFile( std::u32string const & name )
   {
     if ( !isFileOpen ) {
       return false;
@@ -136,7 +137,7 @@ public:
 
   /// Attempts loading the given file into the given vector. Returns true on
   /// success, false otherwise.
-  bool loadFile( const std::u32string & name, std::vector< char > & result )
+  bool loadFile( std::u32string const & name, std::vector< char > & result )
   {
     if ( !isFileOpen ) {
       return false;
@@ -202,7 +203,7 @@ class MdxDictionary: public BtreeIndexing::BtreeDictionary
 
 public:
 
-  MdxDictionary( const string & id, const string & indexFile, const vector< string > & dictionaryFiles );
+  MdxDictionary( string const & id, string const & indexFile, vector< string > const & dictionaryFiles );
 
   ~MdxDictionary() override;
 
@@ -228,20 +229,20 @@ public:
     return idxHeader.langTo;
   }
 
-  sptr< Dictionary::DataRequest > getArticle( const std::u32string & word,
-                                              const vector< std::u32string > & alts,
-                                              const std::u32string &,
+  sptr< Dictionary::DataRequest > getArticle( std::u32string const & word,
+                                              vector< std::u32string > const & alts,
+                                              std::u32string const &,
                                               bool ignoreDiacritics ) override;
-  sptr< Dictionary::DataRequest > getResource( const string & name ) override;
-  const QString & getDescription() override;
+  sptr< Dictionary::DataRequest > getResource( string const & name ) override;
+  QString const & getDescription() override;
 
   sptr< Dictionary::DataRequest >
-  getSearchResults( const QString & searchString, int searchMode, bool matchCase, bool ignoreDiacritics ) override;
+  getSearchResults( QString const & searchString, int searchMode, bool matchCase, bool ignoreDiacritics ) override;
   void getArticleText( uint32_t articleAddress, QString & headword, QString & text ) override;
 
   void makeFTSIndex( QAtomicInt & isCancelled ) override;
 
-  void setFTSParameters( const Config::FullTextSearch & fts ) override
+  void setFTSParameters( Config::FullTextSearch const & fts ) override
   {
     if ( !ensureInitDone().empty() ) {
       return;
@@ -263,7 +264,7 @@ protected:
 
 private:
 
-  const string & ensureInitDone() override;
+  string const & ensureInitDone() override;
   void doDeferredInit();
 
   /// Loads an article with the given offset, filling the given strings.
@@ -282,7 +283,7 @@ private:
   void loadResourceFile( const std::u32string & resourceName, vector< char > & data );
 };
 
-MdxDictionary::MdxDictionary( const string & id, const string & indexFile, const vector< string > & dictionaryFiles ):
+MdxDictionary::MdxDictionary( string const & id, string const & indexFile, vector< string > const & dictionaryFiles ):
   BtreeDictionary( id, dictionaryFiles ),
   idx( indexFile, QIODevice::ReadOnly ),
   idxFileName( indexFile ),
@@ -346,7 +347,7 @@ void MdxDictionary::deferredInit()
   }
 }
 
-const string & MdxDictionary::ensureInitDone()
+string const & MdxDictionary::ensureInitDone()
 {
   doDeferredInit();
   return initError;
@@ -400,7 +401,7 @@ void MdxDictionary::doDeferredInit()
         mddIndexInfos.emplace_back( btreeMaxElements, rootOffset );
       }
 
-      const vector< string > dictFiles = getDictionaryFilenames();
+      vector< string > const dictFiles = getDictionaryFilenames();
       for ( uint32_t i = 1; i < dictFiles.size() && i < mddFileNames.size() + 1; i++ ) {
         QFileInfo fi( QString::fromUtf8( dictFiles[ i ].c_str() ) );
         QString mddFileName = QString::fromUtf8( mddFileNames[ i - 1 ].c_str() );
@@ -471,7 +472,7 @@ void MdxDictionary::getArticleText( uint32_t articleAddress, QString & headword,
   }
 }
 
-sptr< Dictionary::DataRequest > MdxDictionary::getSearchResults( const QString & searchString,
+sptr< Dictionary::DataRequest > MdxDictionary::getSearchResults( QString const & searchString,
                                                                  int searchMode,
                                                                  bool matchCase,
 
@@ -498,8 +499,8 @@ class MdxArticleRequest: public Dictionary::DataRequest
 
 public:
 
-  MdxArticleRequest( const std::u32string & word_,
-                     const vector< std::u32string > & alts_,
+  MdxArticleRequest( std::u32string const & word_,
+                     vector< std::u32string > const & alts_,
                      MdxDictionary & dict_,
                      bool ignoreDiacritics_ ):
     word( word_ ),
@@ -644,7 +645,7 @@ class MddResourceRequest: public Dictionary::DataRequest
 
 public:
 
-  MddResourceRequest( MdxDictionary & dict_, const string & resourceName_ ):
+  MddResourceRequest( MdxDictionary & dict_, string const & resourceName_ ):
     dict( dict_ ),
     resourceName( Text::toUtf32( resourceName_ ) )
   {
@@ -1211,14 +1212,14 @@ void MdxDictionary::loadResourceFile( const std::u32string & resourceName, vecto
   }
 }
 
-static void addEntryToIndex( const QString & word, uint32_t offset, IndexedWords & indexedWords )
+static void addEntryToIndex( QString const & word, uint32_t offset, IndexedWords & indexedWords )
 {
   // Strip any leading or trailing whitespaces
   QString wordTrimmed = word.trimmed();
   indexedWords.addWord( wordTrimmed.toStdU32String(), offset );
 }
 
-static void addEntryToIndexSingle( const QString & word, uint32_t offset, IndexedWords & indexedWords )
+static void addEntryToIndexSingle( QString const & word, uint32_t offset, IndexedWords & indexedWords )
 {
   // Strip any leading or trailing whitespaces
   QString wordTrimmed = word.trimmed();
@@ -1234,7 +1235,7 @@ public:
   {
   }
 
-  void handleRecord( const QString & headWord, const MdictParser::RecordInfo & recordInfo ) override
+  void handleRecord( QString const & headWord, MdictParser::RecordInfo const & recordInfo ) override
   {
     // Save the article's record info
     uint32_t articleAddress = chunks.startNewBlock();
@@ -1257,7 +1258,7 @@ public:
   {
   }
 
-  void handleRecord( const QString & fileName, const MdictParser::RecordInfo & recordInfo ) override
+  void handleRecord( QString const & fileName, MdictParser::RecordInfo const & recordInfo ) override
   {
     uint32_t resourceInfoAddress = chunks.startNewBlock();
     chunks.addToBlock( &recordInfo, sizeof( recordInfo ) );
@@ -1271,7 +1272,7 @@ private:
 };
 
 
-static bool indexIsOldOrBad( const vector< string > & dictFiles, const string & indexFile )
+static bool indexIsOldOrBad( vector< string > const & dictFiles, string const & indexFile )
 {
   File::Index idx( indexFile, QIODevice::ReadOnly );
   IdxHeader header;
@@ -1281,7 +1282,7 @@ static bool indexIsOldOrBad( const vector< string > & dictFiles, const string & 
     || header.foldingVersion != Folding::Version || header.mddIndexInfosCount != dictFiles.size() - 1;
 }
 
-static void findResourceFiles( const string & mdx, vector< string > & dictFiles )
+static void findResourceFiles( string const & mdx, vector< string > & dictFiles )
 {
   string base( mdx, 0, mdx.size() - 4 );
   // Check if there' is any file end with .mdd, which is the resource file for the dictionary
@@ -1304,8 +1305,8 @@ static void findResourceFiles( const string & mdx, vector< string > & dictFiles 
   }
 }
 
-vector< sptr< Dictionary::Class > > makeDictionaries( const vector< string > & fileNames,
-                                                      const string & indicesDir,
+vector< sptr< Dictionary::Class > > makeDictionaries( vector< string > const & fileNames,
+                                                      string const & indicesDir,
                                                       Dictionary::Initializing & initializing )
 {
   vector< sptr< Dictionary::Class > > dictionaries;
@@ -1428,13 +1429,13 @@ vector< sptr< Dictionary::Class > > makeDictionaries( const vector< string > & f
 
       // Save dictionary stylesheets
       {
-        const MdictParser::StyleSheets & styleSheets = parser.styleSheets();
+        MdictParser::StyleSheets const & styleSheets = parser.styleSheets();
         idxHeader.styleSheetAddress                  = idx.tell();
         idxHeader.styleSheetCount                    = styleSheets.size();
 
-        for ( const auto & [ key, value ] : styleSheets ) {
-          const string styleBegin( value.first.toStdString() );
-          const string styleEnd( value.second.toStdString() );
+        for ( auto const & [ key, value ] : styleSheets ) {
+          string const styleBegin( value.first.toStdString() );
+          string const styleEnd( value.second.toStdString() );
 
           // key
           idx.write< qint32 >( key );
@@ -1461,7 +1462,7 @@ vector< sptr< Dictionary::Class > > makeDictionaries( const vector< string > & f
       // Build index info for each mdd file
       vector< IndexInfo > mddIndexInfos;
       for ( const auto & mddIndice : mddIndices ) {
-        const IndexInfo resourceIdxInfo = BtreeIndexing::buildIndex( *mddIndice, idx );
+        IndexInfo const resourceIdxInfo = BtreeIndexing::buildIndex( *mddIndice, idx );
         mddIndexInfos.push_back( resourceIdxInfo );
       }
 

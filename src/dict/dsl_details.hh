@@ -9,6 +9,7 @@
 #include <zlib.h>
 #include "dictionary.hh"
 #include "iconv.hh"
+#include <QByteArray>
 #include "text.hh"
 
 // Implementation details for Dsl, not part of its interface
@@ -23,7 +24,7 @@ using Text::LineFeed;
 
 string findCodeForDslId( int id );
 
-bool isAtSignFirst( const std::u32string & str );
+bool isAtSignFirst( std::u32string const & str );
 
 /// Parses the DSL language, representing it in its structural DOM form.
 struct ArticleDom
@@ -42,14 +43,14 @@ struct ArticleDom
     class Tag
     {};
 
-    Node( Tag, const std::u32string & name, const std::u32string & attrs ):
+    Node( Tag, std::u32string const & name, std::u32string const & attrs ):
       isTag( true ),
       tagName( name ),
       tagAttrs( attrs )
     {
     }
 
-    Node( Text, const std::u32string & text_ ):
+    Node( Text, std::u32string const & text_ ):
       isTag( false ),
       text( text_ )
     {
@@ -62,22 +63,22 @@ struct ArticleDom
 
   /// Does the parse at construction. Refer to the 'root' member variable
   /// afterwards.
-  explicit ArticleDom( const std::u32string &,
-                       const string & dictName          = string(),
-                       const std::u32string & headword_ = std::u32string() );
+  explicit ArticleDom( std::u32string const &,
+                       string const & dictName          = string(),
+                       std::u32string const & headword_ = std::u32string() );
 
   /// Root of DOM's tree
   Node root;
 
 private:
 
-  void openTag( const std::u32string & name, const std::u32string & attr, list< Node * > & stack );
+  void openTag( std::u32string const & name, std::u32string const & attr, list< Node * > & stack );
 
-  void closeTag( const std::u32string & name, list< Node * > & stack, bool warn = true );
+  void closeTag( std::u32string const & name, list< Node * > & stack, bool warn = true );
 
   bool atSignFirstInLine();
 
-  const char32_t *stringPos, *lineStartPos;
+  char32_t const *stringPos, *lineStartPos;
 
   class eot: std::exception
   {};
@@ -119,7 +120,7 @@ public:
   DEF_EX( exUnknownCodePage, "The .dsl file specified an unknown code page", Ex )
   DEF_EX( exEncodingError, "Encoding error", Ex ) // Should never happen really
 
-  explicit DslScanner( const string & fileName );
+  explicit DslScanner( string const & fileName );
   ~DslScanner() noexcept;
 
   /// Returns the detected encoding of this file.
@@ -129,25 +130,25 @@ public:
   }
 
   /// Returns the dictionary's name, as was read from file's headers.
-  const std::u32string & getDictionaryName() const
+  std::u32string const & getDictionaryName() const
   {
     return dictionaryName;
   }
 
   /// Returns the dictionary's source language, as was read from file's headers.
-  const std::u32string & getLangFrom() const
+  std::u32string const & getLangFrom() const
   {
     return langFrom;
   }
 
   /// Returns the dictionary's target language, as was read from file's headers.
-  const std::u32string & getLangTo() const
+  std::u32string const & getLangTo() const
   {
     return langTo;
   }
 
   /// Returns the preferred external dictionary with sounds, as was read from file's headers.
-  const std::u32string & getSoundDictionaryName() const
+  std::u32string const & getSoundDictionaryName() const
   {
     return soundDictionary;
   }
@@ -188,7 +189,7 @@ void expandOptionalParts( std::u32string & str,
 
 /// Expands all unescaped tildes, inserting tildeReplacement text instead of
 /// them.
-void expandTildes( std::u32string & str, const std::u32string & tildeReplacement );
+void expandTildes( std::u32string & str, std::u32string const & tildeReplacement );
 
 /// Unescapes any escaped chars. Be sure to handle all their special meanings
 /// before unescaping them.
@@ -214,7 +215,7 @@ inline size_t DslScanner::distanceToBytes( size_t x ) const
 
 /// Converts the given language name taken from Dsl header (i.e. getLangFrom(),
 /// getLangTo()) to its proper language id.
-quint32 dslLanguageToId( const std::u32string & name );
+quint32 dslLanguageToId( std::u32string const & name );
 
 } // namespace Details
 } // namespace Dsl

@@ -14,6 +14,6 @@ using std::string;
 quint32 getLanguageId( const QString & lang );
 
 vector< sptr< Dictionary::Class > >
-makeDictionaries( const vector< string > & fileNames, const string & indicesDir, Dictionary::Initializing & );
+makeDictionaries( vector< string > const & fileNames, string const & indicesDir, Dictionary::Initializing & );
 
 } // namespace Xdxf

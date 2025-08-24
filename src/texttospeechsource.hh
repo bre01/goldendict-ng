@@ -26,30 +26,30 @@ public:
     kColumnCount
   };
 
-  VoiceEnginesModel( QWidget * parent, const Config::VoiceEngines & voiceEngines );
+  VoiceEnginesModel( QWidget * parent, Config::VoiceEngines const & voiceEngines );
 
   void removeVoiceEngine( int index );
-  void addNewVoiceEngine( const QString & engine_name,
+  void addNewVoiceEngine( QString const & engine_name,
                           QLocale locale,
-                          const QString & name,
-                          const QString & voice_name,
+                          QString const & name,
+                          QString const & voice_name,
                           int volume,
                           int rate );
 
-  const Config::VoiceEngines & getCurrentVoiceEngines() const
+  Config::VoiceEngines const & getCurrentVoiceEngines() const
   {
     return voiceEngines;
   }
   void setEngineParams( QModelIndex idx, int volume, int rate );
 
-  QModelIndex index( int row, int column, const QModelIndex & parent ) const override;
-  QModelIndex parent( const QModelIndex & parent ) const override;
-  Qt::ItemFlags flags( const QModelIndex & index ) const override;
-  int rowCount( const QModelIndex & parent ) const override;
-  int columnCount( const QModelIndex & parent ) const override;
+  QModelIndex index( int row, int column, QModelIndex const & parent ) const override;
+  QModelIndex parent( QModelIndex const & parent ) const override;
+  Qt::ItemFlags flags( QModelIndex const & index ) const override;
+  int rowCount( QModelIndex const & parent ) const override;
+  int columnCount( QModelIndex const & parent ) const override;
   QVariant headerData( int section, Qt::Orientation orientation, int role ) const override;
-  QVariant data( const QModelIndex & index, int role ) const override;
-  bool setData( const QModelIndex & index, const QVariant & value, int role ) override;
+  QVariant data( QModelIndex const & index, int role ) const override;
+  bool setData( QModelIndex const & index, const QVariant & value, int role ) override;
 
 private:
   Config::VoiceEngines voiceEngines;
@@ -60,12 +60,12 @@ class VoiceEngineEditor: public QComboBox
   Q_OBJECT
 
 public:
-  VoiceEngineEditor( const SpeechClient::Engines & engines, QWidget * parent = nullptr );
+  VoiceEngineEditor( SpeechClient::Engines const & engines, QWidget * parent = nullptr );
 
 
   QString engineName() const;
   QString engineId() const;
-  void setEngineId( const QString & engineId );
+  void setEngineId( QString const & engineId );
 };
 
 class VoiceEngineItemDelegate: public QStyledItemDelegate
@@ -73,10 +73,10 @@ class VoiceEngineItemDelegate: public QStyledItemDelegate
   Q_OBJECT
 
 public:
-  VoiceEngineItemDelegate( const SpeechClient::Engines & engines, QObject * parent = nullptr );
+  VoiceEngineItemDelegate( SpeechClient::Engines const & engines, QObject * parent = nullptr );
 
   QWidget *
-  createEditor( QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
+  createEditor( QWidget * parent, QStyleOptionViewItem const & option, QModelIndex const & index ) const override;
   virtual void setEditorData( QWidget * uncastedEditor, const QModelIndex & index ) const override;
   virtual void
   setModelData( QWidget * uncastedEditor, QAbstractItemModel * model, const QModelIndex & index ) const override;

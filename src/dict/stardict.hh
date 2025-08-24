@@ -11,8 +11,8 @@ namespace Stardict {
 using std::vector;
 using std::string;
 
-vector< sptr< Dictionary::Class > > makeDictionaries( const vector< string > & fileNames,
-                                                      const string & indicesDir,
+vector< sptr< Dictionary::Class > > makeDictionaries( vector< string > const & fileNames,
+                                                      string const & indicesDir,
                                                       Dictionary::Initializing &,
                                                       unsigned maxHeadwordsToExpand );
 

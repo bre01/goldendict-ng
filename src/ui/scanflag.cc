@@ -1,7 +1,8 @@
 #include "scanflag.hh"
 #include <QCursor>
-#include <QScreen>
 #include <QGuiApplication>
+#include <QScreen>
+
 
 ScanFlag::ScanFlag( QWidget * parent ):
   QMainWindow( parent ),

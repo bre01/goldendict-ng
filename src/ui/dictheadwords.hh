@@ -1,6 +1,12 @@
 #pragma once
 
+#include <QDialog>
+#include <QSet>
+#include <QString>
+#include <QStringList>
+#include <QStringListModel>
 #include <QSortFilterProxyModel>
+#include <QAction>
 #include <qprogressdialog.h>
 
 #include "config.hh"
@@ -54,6 +60,6 @@ private slots:
   virtual void reject();
 
 signals:
-  void headwordSelected( const QString &, const QString & );
+  void headwordSelected( QString const &, QString const & );
   void closeDialog();
 };

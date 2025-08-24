@@ -1,6 +1,7 @@
 /* This file is (c) 2008-2012 Konstantin Isakov <ikm@goldendict.org>
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
+#include <QIcon>
 #include "initializing.hh"
 #include <QCloseEvent>
 
@@ -19,13 +20,13 @@ Initializing::Initializing( QWidget * parent, bool showSplashWindow ):
   }
 }
 
-void Initializing::indexing( const QString & dictionaryName )
+void Initializing::indexing( QString const & dictionaryName )
 {
   ui.operation->setText( tr( "Indexing..." ) );
   ui.dictionary->setText( dictionaryName );
 }
 
-void Initializing::loading( const QString & dictionaryName )
+void Initializing::loading( QString const & dictionaryName )
 {
   ui.operation->setText( tr( "Loading..." ) );
   ui.dictionary->setText( dictionaryName );

@@ -9,8 +9,10 @@
 #include "speechclient.hh"
 #include "utils.hh"
 #include "webmultimediadownload.hh"
+#include "wildcard.hh"
 #include <QBuffer>
 #include <QClipboard>
+#include <QCryptographicHash>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -21,6 +23,7 @@
 #include <QVariant>
 #include <QWebChannel>
 #include <QWebEngineHistory>
+#include <QWebEngineScript>
 #include <QWebEngineScriptCollection>
 #include <QWebEngineSettings>
 #include <map>
@@ -40,14 +43,14 @@ using std::list;
 
 namespace {
 
-const char * const scrollToPrefix = "gdfrom-";
+char const * const scrollToPrefix = "gdfrom-";
 
-bool isScrollTo( const QString & id )
+bool isScrollTo( QString const & id )
 {
   return id.startsWith( scrollToPrefix );
 }
 
-QString dictionaryIdFromScrollTo( const QString & scrollTo )
+QString dictionaryIdFromScrollTo( QString const & scrollTo )
 {
   Q_ASSERT( isScrollTo( scrollTo ) );
   constexpr int scrollToPrefixLength = 7;
@@ -69,7 +72,7 @@ QString searchStatusMessage( int activeMatch, int matchCount )
 
 } // unnamed namespace
 
-QString ArticleView::scrollToFromDictionaryId( const QString & dictionaryId )
+QString ArticleView::scrollToFromDictionaryId( QString const & dictionaryId )
 {
   Q_ASSERT( !isScrollTo( dictionaryId ) );
   return scrollToPrefix + dictionaryId;
@@ -77,12 +80,12 @@ QString ArticleView::scrollToFromDictionaryId( const QString & dictionaryId )
 
 ArticleView::ArticleView( QWidget * parent,
                           ArticleNetworkAccessManager & nm,
-                          const AudioPlayerPtr & audioPlayer_,
-                          const std::vector< sptr< Dictionary::Class > > & allDictionaries_,
-                          const Instances::Groups & groups_,
+                          AudioPlayerPtr const & audioPlayer_,
+                          std::vector< sptr< Dictionary::Class > > const & allDictionaries_,
+                          Instances::Groups const & groups_,
                           bool popupView_,
-                          const Config::Class & cfg_,
-                          const QLineEdit * translateLine_,
+                          Config::Class const & cfg_,
+                          QLineEdit const * translateLine_,
                           QAction * dictionaryBarToggled_,
                           unsigned int currentGroupId_ ):
   QWidget( parent ),
@@ -229,7 +232,7 @@ ArticleView::ArticleView( QWidget * parent,
   agent   = new ArticleViewAgent( this );
   attachWebChannelToHtml();
   ankiConnector = new AnkiConnector( this, cfg );
-  connect( ankiConnector, &AnkiConnector::errorText, this, [ this ]( const QString & errorText ) {
+  connect( ankiConnector, &AnkiConnector::errorText, this, [ this ]( QString const & errorText ) {
     emit statusBarMessage( errorText );
   } );
 
@@ -278,10 +281,10 @@ ArticleView::~ArticleView()
 #endif
 }
 
-void ArticleView::showDefinition( const QString & word,
+void ArticleView::showDefinition( QString const & word,
                                   unsigned group,
-                                  const QString & scrollTo,
-                                  const Contexts & contexts_ )
+                                  QString const & scrollTo,
+                                  Contexts const & contexts_ )
 {
   GlobalBroadcaster::instance()->pronounce_engine.reset();
   currentWord = word.trimmed();
@@ -348,9 +351,9 @@ void ArticleView::showDefinition( const QString & word,
   emit sendWordToHistory( word );
 }
 
-void ArticleView::showDefinition( const QString & word,
-                                  const QStringList & dictIDs,
-                                  const QRegularExpression & searchRegExp,
+void ArticleView::showDefinition( QString const & word,
+                                  QStringList const & dictIDs,
+                                  QRegularExpression const & searchRegExp,
                                   unsigned group,
                                   bool ignoreDiacritics )
 {
@@ -400,15 +403,15 @@ void ArticleView::showDefinition( const QString & word,
   emit sendWordToHistory( word );
 }
 
-void ArticleView::showDefinition( const QString & word,
-                                  const QStringList & dictIDs,
+void ArticleView::showDefinition( QString const & word,
+                                  QStringList const & dictIDs,
                                   unsigned group,
                                   bool ignoreDiacritics )
 {
   showDefinition( word, dictIDs, {}, group, ignoreDiacritics );
 }
 
-void ArticleView::sendToAnki( const QString & word, const QString & dict_definition, const QString & sentence )
+void ArticleView::sendToAnki( QString const & word, QString const & dict_definition, QString const & sentence )
 {
   ankiConnector->sendToAnki( word, dict_definition, sentence );
 }
@@ -439,7 +442,7 @@ void ArticleView::loadFinished( bool result )
   qDebug() << "article view loaded url:" << url.url().left( 50 ) << result;
 
   if ( cfg.preferences.autoScrollToTargetArticle ) {
-    const QString scrollTo = Utils::Url::queryItemValue( url, "scrollto" );
+    QString const scrollTo = Utils::Url::queryItemValue( url, "scrollto" );
     if ( isScrollTo( scrollTo ) ) {
       setCurrentArticle( scrollTo, true );
     }
@@ -476,14 +479,14 @@ void ArticleView::loadFinished( bool result )
   }
 }
 
-void ArticleView::handleTitleChanged( const QString & title )
+void ArticleView::handleTitleChanged( QString const & title )
 {
   if ( !title.isEmpty() && !title.contains( "://" ) ) {
     emit titleChanged( this, title );
   }
 }
 
-unsigned ArticleView::getGroup( const QUrl & url )
+unsigned ArticleView::getGroup( QUrl const & url )
 {
   if ( url.scheme() == "gdlookup" && Utils::Url::hasQueryItem( url, "group" ) ) {
     return Utils::Url::queryItemValue( url, "group" ).toUInt();
@@ -502,7 +505,7 @@ QString ArticleView::getActiveArticleId()
   return activeDictId;
 }
 
-void ArticleView::setActiveArticleId( const QString & dictId )
+void ArticleView::setActiveArticleId( QString const & dictId )
 {
   this->activeDictId = dictId;
 }
@@ -513,7 +516,7 @@ QString ArticleView::getCurrentArticle()
   return scrollToFromDictionaryId( dictId );
 }
 
-void ArticleView::jumpToDictionary( const QString & id, bool force )
+void ArticleView::jumpToDictionary( QString const & id, bool force )
 {
 
   // jump only if neceessary, or when forced
@@ -522,7 +525,7 @@ void ArticleView::jumpToDictionary( const QString & id, bool force )
   }
 }
 
-bool ArticleView::setCurrentArticle( const QString & id, bool moveToIt )
+bool ArticleView::setCurrentArticle( QString const & id, bool moveToIt )
 {
   if ( !isScrollTo( id ) ) {
     return false; // Incorrect id
@@ -557,7 +560,7 @@ void ArticleView::selectCurrentArticle()
       .arg( getActiveArticleId(), getCurrentArticle() ) );
 }
 
-void ArticleView::isFramedArticle( const QString & ca, const std::function< void( bool ) > & callback )
+void ArticleView::isFramedArticle( QString const & ca, const std::function< void( bool ) > & callback )
 {
   if ( ca.isEmpty() ) {
     callback( false );
@@ -584,7 +587,7 @@ void ArticleView::tryMangleWebsiteClickedUrl( QUrl & url, Contexts & contexts )
   }
 }
 
-void ArticleView::load( const QUrl & url )
+void ArticleView::load( QUrl const & url )
 {
   webview->load( url );
 }
@@ -777,11 +780,11 @@ QStringList ArticleView::getMutedDictionaries( unsigned group )
 {
   if ( dictionaryBarToggled && dictionaryBarToggled->isChecked() ) {
     // Dictionary bar is active -- mute the muted dictionaries
-    const Instances::Group * groupInstance = dictionaryGroup->getGroupById( group );
+    Instances::Group const * groupInstance = dictionaryGroup->getGroupById( group );
 
     // Find muted dictionaries for current group
-    const Config::Group * grp = cfg.getGroup( group );
-    const Config::MutedDictionaries * mutedDictionaries;
+    Config::Group const * grp = cfg.getGroup( group );
+    Config::MutedDictionaries const * mutedDictionaries;
     if ( group == GroupId::AllGroupId ) {
       mutedDictionaries = popupView ? &cfg.popupMutedDictionaries : &cfg.mutedDictionaries;
     }
@@ -877,7 +880,7 @@ void ArticleView::attachWebChannelToHtml()
   channel->registerObject( QStringLiteral( "articleview" ), agent );
 }
 
-void ArticleView::linkClicked( const QUrl & url_ )
+void ArticleView::linkClicked( QUrl const & url_ )
 {
   Qt::KeyboardModifiers kmod = QApplication::keyboardModifiers();
 
@@ -902,7 +905,7 @@ void ArticleView::linkClicked( const QUrl & url_ )
   }
 }
 
-void ArticleView::linkClickedInHtml( const QUrl & url_ )
+void ArticleView::linkClickedInHtml( QUrl const & url_ )
 {
   webview->linkClickedInHtml( url_ );
   if ( !url_.isEmpty() ) {
@@ -910,15 +913,122 @@ void ArticleView::linkClickedInHtml( const QUrl & url_ )
   }
 }
 
-void ArticleView::makeAnkiCardFromArticle( const QString & article_id )
-{
-  const auto js_code = QString( R"EOF(document.getElementById("gdarticlefrom-%1").innerText)EOF" ).arg( article_id );
-  webview->page()->runJavaScript( js_code, [ this ]( const QVariant & article_text ) {
-    sendToAnki( webview->title(), article_text.toString(), translateLine->text() );
-  } );
+
+QString ArticleView::replaceTags(QString &html){
+  auto ptags=std::make_shared<QVector<GdauTagInfo>>(  );
+
+  QRegularExpression tagRegex( R"(<a\b[^>]*\b(href|data-src-mp3)\s*=\s*"gdau://[^"]+"[^>]*>.*?</a>)",QRegularExpression::DotMatchesEverythingOption);
+  QRegularExpressionMatchIterator i= tagRegex.globalMatch(html);
+  int id =0;
+  while(i.hasNext()){
+    id +=1;
+    QRegularExpressionMatch match=i.next();
+    QString fullTag=match.captured(0);
+    QRegularExpression urlRegex(R"(gdau://[^\"'\s>]+)");
+    QRegularExpressionMatch urlMatch = urlRegex.match(fullTag);
+
+    QString urlString;
+    if (urlMatch.hasMatch()) {
+      urlString = urlMatch.captured(0);
+    }
+    qDebug() << urlString <<"\n";
+
+    QUrl url(urlString);
+    sptr<Dictionary::Class> dict = dictionaryGroup->getDictionaryById(url.host().toStdString());
+    if (!dict) continue;
+    sptr<Dictionary::DataRequest> req = dict->getResource(url.path().mid(1).toUtf8().data());
+
+    AudioResource ar{"",false,req,std::make_shared<QMutex>(  )};
+    ptags->append({id,fullTag,urlString,ar});
+  }
+
+  auto tags=*ptags ;
+  for (auto &tag: tags) {
+    sptr<Dictionary::DataRequest> req=tag.resource.req;
+    QString urlStr =tag.url;
+    connect(req.get(), &Dictionary::Request::finished, this, [this, req, ptags, tag,html]() {
+        onAudioRequestFinished(req, ptags, tag.id, html);
+      });
+  }
+
+  return QString();
+};
+
+void ArticleView::onAudioRequestFinished(sptr<Dictionary::DataRequest> req, std::shared_ptr<QVector<GdauTagInfo>> ptags,int tagid,QString html) {
+  if (req->dataSize() > 0) {
+    QByteArray data(req->getFullData().data(), static_cast<int>(req->dataSize()));
+    QString base64Audio = data.toBase64();
+
+    // find resource in vector by id and update
+    for (auto &tag : *ptags) {
+      if (tag.id == tagid) {
+        //tag.resource.mutex->lock();
+        tag.resource.base64Data = base64Audio;
+        tag.resource.finished = true;
+        //tag.resource.mutex->unlock();
+        break;
+      }
+    }
+    onAllAudioResourcesReady(ptags,html);
+
+  }
 }
 
-void ArticleView::openLink( const QUrl & url, const QUrl & ref, const QString & scrollTo, const Contexts & contexts_ )
+void ArticleView::replaceGdLookUpToSystemHandler(QString &originalHtml)
+{
+  originalHtml.replace("gdlookup://localhost/","goldendict://");
+}
+
+void ArticleView::onAllAudioResourcesReady(std::shared_ptr<QVector<GdauTagInfo>> ptags,QString &originalHtml) {
+  //return when any tag are unfinished
+  for(auto & tag:*ptags) {
+      if (!tag.resource.finished) return;
+  }
+
+  auto tags=*ptags;
+  for (const auto &tag : *ptags) {
+    qDebug() << tag.resource.base64Data <<'\n' ;
+    QString base64DataUrl = QString("data:audio/mp3;base64,%1").arg(tag.resource.base64Data);
+    QString newTag=tag.fullTag;
+    int onclickPosition=newTag.indexOf("onclick=");
+    newTag.insert(onclickPosition+9,"this.querySelector('audio').play();");
+
+    int insertPos = newTag.indexOf('>'); // position of first '>'
+    if (insertPos != -1) {
+      QString audioTag = QString(
+          R"(<audio> <source src="%1" type="audio/mpeg">
+               Your browser does not support the audio element.
+           </audio>)"
+      ).arg(base64DataUrl);
+      newTag.insert(insertPos+1,audioTag);
+    }
+
+    qDebug() << tag.fullTag;
+    // Replace all occurrences of gdau URL with base64 URL in your HTML string
+    originalHtml.replace(tag.fullTag, newTag);
+  }
+  replaceGdLookUpToSystemHandler(originalHtml);
+
+  sendToAnki(webview->title(), originalHtml, translateLine->text());
+}
+
+
+void ArticleView::makeAnkiCardFromArticle( QString const & article_id )
+{
+ auto const js_code = QString( R"EOF(document.getElementById("gdarticlefrom-%1").innerHTML)EOF" ).arg( article_id );
+  auto const js_css=QString(R"EOF(document.getElementsByTagName("style")[0].outerHTML)EOF" );
+  auto st = std::make_shared<QString>();
+  webview->page()->runJavaScript( js_code, [ this,st]( const QVariant & article_text ) {
+    st->append(article_text.toString());
+  } );
+  webview->page()->runJavaScript(js_css,[this,st](const QVariant &css_text){
+    st->append(css_text.toString());
+    replaceTags(*st);
+        //sendToAnki(webview->title(), embeddedHtml, translateLine->text());
+  });
+}
+
+void ArticleView::openLink( QUrl const & url, QUrl const & ref, QString const & scrollTo, Contexts const & contexts_ )
 {
   audioPlayer->stop();
   qDebug() << "open link url:" << url;
@@ -1000,7 +1110,7 @@ void ArticleView::openLink( const QUrl & url, const QUrl & ref, const QString & 
   }
 }
 
-void ArticleView::playAudio( const QUrl & url )
+void ArticleView::playAudio( QUrl const & url )
 {
   audioPlayer->stop();
   qDebug() << "play audio [url]:" << url;
@@ -1174,7 +1284,7 @@ void ArticleView::setSelectionBySingleClick( bool set )
   webview->setSelectionBySingleClick( set );
 }
 
-void ArticleView::setDelayedHighlightText( const QString & text )
+void ArticleView::setDelayedHighlightText( QString const & text )
 {
   delayedHighlightText = text;
 }
@@ -1308,7 +1418,7 @@ void ArticleView::print( QPrinter * printer ) const
   }
 }
 
-void ArticleView::contextMenuRequested( const QPoint & pos )
+void ArticleView::contextMenuRequested( QPoint const & pos )
 {
   // Is that a link? Is there a selection?
   QWebEnginePage * r = webview->page();
@@ -1373,7 +1483,7 @@ void ArticleView::contextMenuRequested( const QPoint & pos )
     menu.addAction( saveSoundAction );
   }
 
-  const QString selectedText = webview->selectedText();
+  QString const selectedText = webview->selectedText();
   QString text               = Utils::trimNonChar( selectedText );
 
   if ( text.size() && text.size() < 60 ) {
@@ -1395,7 +1505,7 @@ void ArticleView::contextMenuRequested( const QPoint & pos )
     addWordToHistoryAction = new QAction( tr( "&Add \"%1\" to history" ).arg( text ), &menu );
     menu.addAction( addWordToHistoryAction );
 
-    const Instances::Group * altGroup =
+    Instances::Group const * altGroup =
       ( currentGroupId != getGroup( webview->url() ) ) ? dictionaryGroup->getGroupById( currentGroupId ) : nullptr;
 
     if ( altGroup ) {
@@ -1650,7 +1760,7 @@ void ArticleView::resourceDownloadFinished( const sptr< Dictionary::DataRequest 
     return;
   }
   if ( req->dataSize() >= 0 ) {
-    const vector< char > & data = req->getFullData();
+    vector< char > const & data = req->getFullData();
 
     if ( resourceDownloadUrl.scheme() == "gdau" || Utils::Url::isWebAudioUrl( resourceDownloadUrl ) ) {
       // Audio data
@@ -1695,7 +1805,7 @@ void ArticleView::audioDownloadFinished( const sptr< Dictionary::DataRequest > &
   if ( req->dataSize() >= 0 ) {
     // Ok, got one finished, all others are irrelevant now
     qDebug() << "audio download finished. Playing...";
-    const vector< char > & data = req->getFullData();
+    vector< char > const & data = req->getFullData();
 
     // Audio data
     audioPlayer->stop();
@@ -1711,7 +1821,7 @@ void ArticleView::audioDownloadFinished( const sptr< Dictionary::DataRequest > &
   }
 }
 
-void ArticleView::audioPlayerError( const QString & message )
+void ArticleView::audioPlayerError( QString const & message )
 {
   emit statusBarMessage( tr( "WARNING: Audio Player: %1" ).arg( message ), 10000, QPixmap( ":/icons/error.svg" ) );
 }
@@ -1839,7 +1949,7 @@ void ArticleView::on_searchCaseSensitive_clicked( bool checked )
 }
 
 //the id start with "gdform-"
-void ArticleView::onJsActiveArticleChanged( const QString & id )
+void ArticleView::onJsActiveArticleChanged( QString const & id )
 {
   if ( !isScrollTo( id ) ) {
     return; // Incorrect id
@@ -1871,7 +1981,7 @@ void ArticleView::doubleClicked( QPoint pos )
         emit showDefinitionInNewTab( selectedText, getGroup( webview->url() ), getCurrentArticle(), Contexts() );
       }
       else {
-        const QUrl & ref = webview->url();
+        QUrl const & ref = webview->url();
 
         auto groupId = getGroup( ref );
         if ( groupId == 0 || groupId == GroupId::HelpGroupId ) {
@@ -2125,7 +2235,7 @@ void ResourceToSaveHandler::downloadFinished()
     if ( ( *i )->isFinished() ) {
       if ( ( *i )->dataSize() >= 0 && !alreadyDone ) {
         QByteArray resourceData;
-        const vector< char > & data = ( *i )->getFullData();
+        vector< char > const & data = ( *i )->getFullData();
         resourceData                = QByteArray( data.data(), data.size() );
 
         // Write data to file
@@ -2180,17 +2290,17 @@ ArticleViewAgent::ArticleViewAgent( ArticleView * articleView ):
 {
 }
 
-void ArticleViewAgent::onJsActiveArticleChanged( const QString & id )
+void ArticleViewAgent::onJsActiveArticleChanged( QString const & id )
 {
   articleView->onJsActiveArticleChanged( id );
 }
 
-void ArticleViewAgent::linkClickedInHtml( const QUrl & url )
+void ArticleViewAgent::linkClickedInHtml( QUrl const & url )
 {
   articleView->linkClickedInHtml( url );
 }
 
-void ArticleViewAgent::collapseInHtml( const QString & dictId, bool on ) const
+void ArticleViewAgent::collapseInHtml( QString const & dictId, bool on ) const
 {
   if ( GlobalBroadcaster::instance()->getPreference()->sessionCollapse ) {
     if ( on ) {

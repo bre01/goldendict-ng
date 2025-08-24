@@ -4,6 +4,7 @@
 #include "wordfinder.hh"
 #include "folding.hh"
 #include <map>
+#include <QMutexLocker>
 
 
 using std::vector;
@@ -27,8 +28,8 @@ WordFinder::~WordFinder()
   clear();
 }
 
-void WordFinder::prefixMatch( const QString & str,
-                              const std::vector< sptr< Dictionary::Class > > & dicts,
+void WordFinder::prefixMatch( QString const & str,
+                              std::vector< sptr< Dictionary::Class > > const & dicts,
                               unsigned long maxResults,
                               Dictionary::Features features )
 {
@@ -47,8 +48,8 @@ void WordFinder::prefixMatch( const QString & str,
   // queuedRequests is empty, so we can safely call startSearch()
   startSearch();
 }
-void WordFinder::stemmedMatch( const QString & str,
-                               const std::vector< sptr< Dictionary::Class > > & dicts,
+void WordFinder::stemmedMatch( QString const & str,
+                               std::vector< sptr< Dictionary::Class > > const & dicts,
                                unsigned minLength,
                                unsigned maxSuffixVariation,
                                unsigned long maxResults,
@@ -71,8 +72,8 @@ void WordFinder::stemmedMatch( const QString & str,
   startSearch();
 }
 
-void WordFinder::expressionMatch( const QString & str,
-                                  const std::vector< sptr< Dictionary::Class > > & dicts,
+void WordFinder::expressionMatch( QString const & str,
+                                  std::vector< sptr< Dictionary::Class > > const & dicts,
                                   unsigned long maxResults,
                                   Dictionary::Features features )
 {
@@ -212,8 +213,8 @@ unsigned saturated( unsigned x )
 /// both sides by either whitespace, punctuation or begin/end of string.
 /// If true is returned, pos holds the offset in the haystack. If the offset
 /// is larger than 255, it is set to 255.
-bool hasSurroundedWithWs( const std::u32string & haystack,
-                          const std::u32string & needle,
+bool hasSurroundedWithWs( std::u32string const & haystack,
+                          std::u32string const & needle,
                           std::u32string::size_type & pos )
 {
   if ( haystack.size() < needle.size() ) {
@@ -434,7 +435,7 @@ void WordFinder::updateResults()
 
           int charsInCommon = 0;
 
-          for ( const char32_t *t = target.c_str(), *r = resultFolded.c_str(); *t && *t == *r;
+          for ( char32_t const *t = target.c_str(), *r = resultFolded.c_str(); *t && *t == *r;
                 ++t, ++r, ++charsInCommon ) {
             ;
           }

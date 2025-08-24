@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QByteArray>
 #include <QMap>
 
 namespace Epwing {
@@ -11,10 +12,10 @@ public:
   static EpwingCharmap & instance();
 
   /// Map Epwing extra char to Utf-8
-  QByteArray mapToUtf8( const QString & code );
+  QByteArray mapToUtf8( QString const & code );
 
 private:
-  void addEntry( const QString & code, int ch );
+  void addEntry( QString const & code, int ch );
 
   QMap< QString, QChar > charMap;
 };

@@ -107,7 +107,7 @@ class SdictDictionary: public BtreeIndexing::BtreeDictionary
 
 public:
 
-  SdictDictionary( const string & id, const string & indexFile, const vector< string > & dictionaryFiles );
+  SdictDictionary( string const & id, string const & indexFile, vector< string > const & dictionaryFiles );
 
   ~SdictDictionary();
 
@@ -132,20 +132,20 @@ public:
     return idxHeader.langTo;
   }
 
-  sptr< Dictionary::DataRequest > getArticle( const std::u32string &,
-                                              const vector< std::u32string > & alts,
-                                              const std::u32string &,
+  sptr< Dictionary::DataRequest > getArticle( std::u32string const &,
+                                              vector< std::u32string > const & alts,
+                                              std::u32string const &,
                                               bool ignoreDiacritics ) override;
 
-  const QString & getDescription() override;
+  QString const & getDescription() override;
 
   sptr< Dictionary::DataRequest >
-  getSearchResults( const QString & searchString, int searchMode, bool matchCase, bool ignoreDiacritics ) override;
+  getSearchResults( QString const & searchString, int searchMode, bool matchCase, bool ignoreDiacritics ) override;
   void getArticleText( uint32_t articleAddress, QString & headword, QString & text ) override;
 
   void makeFTSIndex( QAtomicInt & isCancelled ) override;
 
-  void setFTSParameters( const Config::FullTextSearch & fts ) override
+  void setFTSParameters( Config::FullTextSearch const & fts ) override
   {
     if ( metadata_enable_fts.has_value() ) {
       can_FTS = fts.enabled && metadata_enable_fts.value();
@@ -164,14 +164,14 @@ private:
 
   /// Loads the article.
   void loadArticle( uint32_t address, string & articleText );
-  string convert( const string & in_data );
+  string convert( string const & in_data );
 
   friend class SdictArticleRequest;
 };
 
-SdictDictionary::SdictDictionary( const string & id,
-                                  const string & indexFile,
-                                  const vector< string > & dictionaryFiles ):
+SdictDictionary::SdictDictionary( string const & id,
+                                  string const & indexFile,
+                                  vector< string > const & dictionaryFiles ):
   BtreeDictionary( id, dictionaryFiles ),
   idx( indexFile, QIODevice::ReadOnly ),
   idxHeader( idx.read< IdxHeader >() ),
@@ -213,7 +213,7 @@ void SdictDictionary::loadIcon() noexcept
   dictionaryIconLoaded = true;
 }
 
-string SdictDictionary::convert( const string & in )
+string SdictDictionary::convert( string const & in )
 {
   //    qDebug( "Source>>>>>>>>>>: %s\n\n", in.c_str() );
 
@@ -399,7 +399,7 @@ void SdictDictionary::getArticleText( uint32_t articleAddress, QString & headwor
 }
 
 sptr< Dictionary::DataRequest >
-SdictDictionary::getSearchResults( const QString & searchString, int searchMode, bool matchCase, bool ignoreDiacritics )
+SdictDictionary::getSearchResults( QString const & searchString, int searchMode, bool matchCase, bool ignoreDiacritics )
 {
   return std::make_shared< FtsHelpers::FTSResultsRequest >( *this,
                                                             searchString,
@@ -425,8 +425,8 @@ class SdictArticleRequest: public Dictionary::DataRequest
 
 public:
 
-  SdictArticleRequest( const std::u32string & word_,
-                       const vector< std::u32string > & alts_,
+  SdictArticleRequest( std::u32string const & word_,
+                       vector< std::u32string > const & alts_,
                        SdictDictionary & dict_,
                        bool ignoreDiacritics_ ):
     word( word_ ),
@@ -559,16 +559,16 @@ void SdictArticleRequest::run()
   finish();
 }
 
-sptr< Dictionary::DataRequest > SdictDictionary::getArticle( const std::u32string & word,
-                                                             const vector< std::u32string > & alts,
-                                                             const std::u32string &,
+sptr< Dictionary::DataRequest > SdictDictionary::getArticle( std::u32string const & word,
+                                                             vector< std::u32string > const & alts,
+                                                             std::u32string const &,
                                                              bool ignoreDiacritics )
 
 {
   return std::make_shared< SdictArticleRequest >( word, alts, *this, ignoreDiacritics );
 }
 
-const QString & SdictDictionary::getDescription()
+QString const & SdictDictionary::getDescription()
 {
   if ( !dictionaryDescription.isEmpty() ) {
     return dictionaryDescription;
@@ -641,8 +641,8 @@ const QString & SdictDictionary::getDescription()
 
 } // anonymous namespace
 
-vector< sptr< Dictionary::Class > > makeDictionaries( const vector< string > & fileNames,
-                                                      const string & indicesDir,
+vector< sptr< Dictionary::Class > > makeDictionaries( vector< string > const & fileNames,
+                                                      string const & indicesDir,
                                                       Dictionary::Initializing & initializing )
 
 {

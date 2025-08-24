@@ -2007,6 +2007,10 @@ entre la ortografía clásica y la escolar en cirílico)</translation>
       <translation>albanés</translation>
     </message>
     <message>
+      <source>Serbian (Cyrillic)</source>
+      <translation>Serbio (cirílico)</translation>
+    </message>
+    <message>
       <source>Swedish</source>
       <translation>sueco</translation>
     </message>
@@ -2071,6 +2075,10 @@ entre la ortografía clásica y la escolar en cirílico)</translation>
       <translation>Aymara</translation>
     </message>
     <message>
+      <source>Arabic, Saudi Arabia</source>
+      <translation>Árabe, Arabia Saudita</translation>
+    </message>
+    <message>
       <source>Turkmen</source>
       <translation>turcomano</translation>
     </message>
@@ -2089,18 +2097,6 @@ entre la ortografía clásica y la escolar en cirílico)</translation>
     <message>
       <source>English</source>
       <translation>Inglés</translation>
-    </message>
-    <message>
-      <source>Arabic</source>
-      <translation>Arabé</translation>
-    </message>
-    <message>
-      <source>Serbian</source>
-      <translation>Serbio</translation>
-    </message>
-    <message>
-      <source>Kabyle</source>
-      <translation type="unfinished">Kabyle</translation>
     </message>
   </context>
   <context>
@@ -2877,6 +2873,10 @@ the application.</source>
       <translation>Apariencia</translation>
     </message>
     <message>
+      <source>Interface Font</source>
+      <translation>Fuente de interfaz</translation>
+    </message>
+    <message>
       <source>Turn the UI to dark.</source>
       <translation>Pon la interfaz de usuario en oscura.</translation>
     </message>
@@ -3435,6 +3435,10 @@ de los diccionarios Stardict, Babylon y GLS.</translation>
       <translation>Save debug messages to gd_log.txt in the config folder</translation>
     </message>
     <message>
+      <source>Interface Font Size</source>
+      <translation>Interface Font Size</translation>
+    </message>
+    <message>
       <source>Interface language</source>
       <translation>Interface language</translation>
     </message>
@@ -3457,22 +3461,6 @@ de los diccionarios Stardict, Babylon y GLS.</translation>
     <message>
       <source>GoldenDict-ng is a dictionary software.</source>
       <translation type="unfinished">GoldenDict-ng is a dictionary software.</translation>
-    </message>
-    <message>
-      <source>Enable Interface Font</source>
-      <translation type="unfinished">Enable Interface Font</translation>
-    </message>
-    <message>
-      <source>Font</source>
-      <translation type="unfinished">Font</translation>
-    </message>
-    <message>
-      <source>Font Size</source>
-      <translation type="unfinished">Font Size</translation>
-    </message>
-    <message>
-      <source>None</source>
-      <translation>Ningún</translation>
     </message>
   </context>
   <context>
@@ -3990,28 +3978,27 @@ Lista completa de idiomas disponibles puede encontrarse &lt;a href=&quot;https:/
       <translation>Confirma la eliminación</translation>
     </message>
     <message>
+      <source>Remove directory &lt;b&gt;%1&lt;/b&gt; from the list?</source>
+      <translation>¿Elimina el directorio &lt;b&gt;%1&lt;/b&gt; de la lista?</translation>
+    </message>
+    <message>
+      <source>Remove site &lt;b&gt;%1&lt;/b&gt; from the list?</source>
+      <translation>¿Eliminar el sitio &lt;b&gt;%1&lt;/b&gt; de la lista?</translation>
+    </message>
+    <message>
+      <source>Remove program &lt;b&gt;%1&lt;/b&gt; from the list?</source>
+      <translation>¿Eliminar el programa &lt;b&gt;%1&lt;/b&gt; de la lista?</translation>
+    </message>
+    <message>
       <source>The most widely used method of transcription of Japanese, based on English phonology</source>
       <translation type="unfinished">The most widely used method of transcription of Japanese, based on English phonology</translation>
     </message>
+  </context>
+  <context>
+    <name>StylesComboBox</name>
     <message>
-      <source>Remove selected directories from the list?</source>
-      <translation type="unfinished">Remove selected directories from the list?</translation>
-    </message>
-    <message>
-      <source>Remove %1 directories from the list?</source>
-      <translation type="unfinished">Remove %1 directories from the list?</translation>
-    </message>
-    <message>
-      <source>Remove %1 sites from the list?</source>
-      <translation type="unfinished">Remove %1 sites from the list?</translation>
-    </message>
-    <message>
-      <source>Remove %1 servers from the list?</source>
-      <translation type="unfinished">Remove %1 servers from the list?</translation>
-    </message>
-    <message>
-      <source>Remove %1 programs from the list?</source>
-      <translation type="unfinished">Remove %1 programs from the list?</translation>
+      <source>None</source>
+      <translation>Ningún</translation>
     </message>
   </context>
   <context>

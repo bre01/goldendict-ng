@@ -23,7 +23,7 @@ using std::string;
 using std::u32string;
 using std::map;
 
-inline string toMd5( const QByteArray & b )
+inline string toMd5( QByteArray const & b )
 {
   return string( QCryptographicHash::hash( b, QCryptographicHash::Md5 ).toHex().constData() );
 }
@@ -36,7 +36,7 @@ private:
 
 public:
 
-  VoiceEnginesDictionary( const Config::VoiceEngine & voiceEngine ):
+  VoiceEnginesDictionary( Config::VoiceEngine const & voiceEngine ):
     Dictionary::Class( toMd5( voiceEngine.name.toUtf8() ), vector< string >() ),
     voiceEngine( voiceEngine )
   {
@@ -58,17 +58,17 @@ public:
     return 0;
   }
 
-  sptr< WordSearchRequest > prefixMatch( const u32string & word, unsigned long maxResults ) override;
+  sptr< WordSearchRequest > prefixMatch( u32string const & word, unsigned long maxResults ) override;
 
   sptr< DataRequest >
-  getArticle( const u32string &, const vector< u32string > & alts, const u32string &, bool ) override;
+  getArticle( u32string const &, vector< u32string > const & alts, u32string const &, bool ) override;
 
 protected:
 
   void loadIcon() noexcept override;
 };
 
-sptr< WordSearchRequest > VoiceEnginesDictionary::prefixMatch( const u32string & /*word*/,
+sptr< WordSearchRequest > VoiceEnginesDictionary::prefixMatch( u32string const & /*word*/,
                                                                unsigned long /*maxResults*/ )
 
 {
@@ -78,7 +78,7 @@ sptr< WordSearchRequest > VoiceEnginesDictionary::prefixMatch( const u32string &
 }
 
 sptr< Dictionary::DataRequest >
-VoiceEnginesDictionary::getArticle( const u32string & word, const vector< u32string > &, const u32string &, bool )
+VoiceEnginesDictionary::getArticle( u32string const & word, vector< u32string > const &, u32string const &, bool )
 
 {
   string result;
@@ -122,7 +122,7 @@ void VoiceEnginesDictionary::loadIcon() noexcept
   dictionaryIconLoaded = true;
 }
 
-vector< sptr< Dictionary::Class > > makeDictionaries( const Config::VoiceEngines & voiceEngines )
+vector< sptr< Dictionary::Class > > makeDictionaries( Config::VoiceEngines const & voiceEngines )
 
 {
   vector< sptr< Dictionary::Class > > result;

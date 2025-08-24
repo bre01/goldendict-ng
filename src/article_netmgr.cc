@@ -1,13 +1,12 @@
 /* This file is (c) 2008-2012 Konstantin Isakov <ikm@goldendict.org>
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
+#include <stdint.h>
+#include <QUrl>
 #include "article_netmgr.hh"
-#include "globalbroadcaster.hh"
 #include "utils.hh"
 #include <QNetworkAccessManager>
-#include <QUrl>
-#include <QWebEngineUrlRequestJob>
-#include <stdint.h>
+#include "globalbroadcaster.hh"
 
 using std::string;
 
@@ -58,7 +57,7 @@ qint64 AllowFrameReply::readData( char * data, qint64 maxSize )
   return size;
 }
 
-QNetworkReply * ArticleNetworkAccessManager::getArticleReply( const QNetworkRequest & req )
+QNetworkReply * ArticleNetworkAccessManager::getArticleReply( QNetworkRequest const & req )
 {
   if ( req.url().scheme() == "qrcx" ) {
     // Do not support qrcx which is the custom define protocol.
@@ -164,7 +163,7 @@ string ArticleNetworkAccessManager::getHtml( ResourceType resourceType )
   }
 }
 
-sptr< Dictionary::DataRequest > ArticleNetworkAccessManager::getResource( const QUrl & url, QString & contentType )
+sptr< Dictionary::DataRequest > ArticleNetworkAccessManager::getResource( QUrl const & url, QString & contentType )
 {
   qDebug() << "getResource:" << url.toString();
 
@@ -199,8 +198,8 @@ sptr< Dictionary::DataRequest > ArticleNetworkAccessManager::getResource( const 
 
     // Unpack contexts
 
-    const QString contextsEncoded           = Utils::Url::queryItemValue( url, "contexts" );
-    const QMap< QString, QString > contexts = Utils::str2map( contextsEncoded );
+    QString const contextsEncoded           = Utils::Url::queryItemValue( url, "contexts" );
+    QMap< QString, QString > const contexts = Utils::str2map( contextsEncoded );
 
     // See for ignore diacritics
 
@@ -247,9 +246,9 @@ sptr< Dictionary::DataRequest > ArticleNetworkAccessManager::getResource( const 
 }
 
 ArticleResourceReply::ArticleResourceReply( QObject * parent,
-                                            const QNetworkRequest & netReq,
-                                            const sptr< Dictionary::DataRequest > & req_,
-                                            const QString & contentType ):
+                                            QNetworkRequest const & netReq,
+                                            sptr< Dictionary::DataRequest > const & req_,
+                                            QString const & contentType ):
   QNetworkReply( parent ),
   req( req_ ),
   alreadyRead( 0 )
@@ -307,13 +306,13 @@ void ArticleResourceReply::reqFinished()
 
 qint64 ArticleResourceReply::bytesAvailable() const
 {
-  const qint64 avail = req->dataSize();
+  qint64 const avail = req->dataSize();
 
   if ( avail < 0 ) {
     return 0;
   }
 
-  const qint64 availBytes = avail - alreadyRead + QNetworkReply::bytesAvailable();
+  qint64 const availBytes = avail - alreadyRead + QNetworkReply::bytesAvailable();
   if ( availBytes == 0 && !req->isFinished() ) {
     return 10240;
   }
@@ -335,17 +334,17 @@ qint64 ArticleResourceReply::readData( char * out, qint64 maxSize )
     return 0;
   }
 
-  const bool finished = req->isFinished();
+  bool const finished = req->isFinished();
 
-  const qint64 avail = req->dataSize();
+  qint64 const avail = req->dataSize();
 
   if ( avail < 0 ) {
     return finished ? -1 : 0;
   }
 
-  const qint64 left = avail - alreadyRead;
+  qint64 const left = avail - alreadyRead;
 
-  const qint64 toRead = maxSize < left ? maxSize : left;
+  qint64 const toRead = maxSize < left ? maxSize : left;
   if ( !toRead && finished ) {
     return -1;
   }
@@ -421,7 +420,7 @@ LocalSchemeHandler::LocalSchemeHandler( ArticleNetworkAccessManager & articleNet
 
 void LocalSchemeHandler::requestStarted( QWebEngineUrlRequestJob * requestJob )
 {
-  const QUrl url = requestJob->requestUrl();
+  QUrl const url = requestJob->requestUrl();
   QNetworkRequest request;
   request.setUrl( url );
 

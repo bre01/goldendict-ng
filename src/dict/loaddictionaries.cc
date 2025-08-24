@@ -53,7 +53,7 @@ using std::set;
 using std::string;
 using std::vector;
 
-LoadDictionaries::LoadDictionaries( const Config::Class & cfg ):
+LoadDictionaries::LoadDictionaries( Config::Class const & cfg ):
   paths( cfg.paths ),
   soundDirs( cfg.soundDirs ),
   hunspell( cfg.hunspell ),
@@ -148,7 +148,7 @@ void LoadDictionaries::addDicts( const std::vector< sptr< Dictionary::Class > > 
   std::move( dicts.begin(), dicts.end(), std::back_inserter( dictionaries ) );
 }
 
-void LoadDictionaries::handlePath( const Config::Path & path )
+void LoadDictionaries::handlePath( Config::Path const & path )
 {
   vector< string > allFiles;
 
@@ -192,19 +192,19 @@ void LoadDictionaries::handlePath( const Config::Path & path )
 #endif
 }
 
-void LoadDictionaries::indexingDictionary( const string & dictionaryName ) noexcept
+void LoadDictionaries::indexingDictionary( string const & dictionaryName ) noexcept
 {
   emit indexingDictionarySignal( QString::fromUtf8( dictionaryName.c_str() ) );
 }
 
-void LoadDictionaries::loadingDictionary( const string & dictionaryName ) noexcept
+void LoadDictionaries::loadingDictionary( string const & dictionaryName ) noexcept
 {
   emit loadingDictionarySignal( QString::fromUtf8( dictionaryName.c_str() ) );
 }
 
 
 void loadDictionaries( QWidget * parent,
-                       const Config::Class & cfg,
+                       Config::Class const & cfg,
                        std::vector< sptr< Dictionary::Class > > & dictionaries,
                        QNetworkAccessManager & dictNetMgr,
                        bool doDeferredInit_ )

@@ -6,9 +6,9 @@ extern "C" {
   #include <libavcodec/avcodec.h>
   #include <libavformat/avformat.h>
   #include <libavutil/avutil.h>
-  #include <libswresample/swresample.h>
+  #include "libswresample/swresample.h"
 }
-  #include "ffmpeg_audiooutput.hh"
+  #include "audiooutput.hh"
   #include <QObject>
   #include <QMutex>
   #include <QByteArray>
@@ -19,8 +19,8 @@ extern "C" {
   #include <QString>
   #include <vector>
 
-namespace Ffmpeg {
 using std::vector;
+namespace Ffmpeg {
 class DecoderThread;
 class AudioService: public QObject
 {
@@ -34,7 +34,7 @@ public:
 
 signals:
   void cancelPlaying( bool waitUntilFinished );
-  void error( const QString & message );
+  void error( QString const & message );
 
 private:
   AudioService() = default;
@@ -65,7 +65,7 @@ struct DecoderContext
 
   SwrContext * swr_;
 
-  DecoderContext( const QByteArray & audioData, QAtomicInt & isCancelled );
+  DecoderContext( QByteArray const & audioData, QAtomicInt & isCancelled );
   ~DecoderContext();
 
   bool openCodec( QString & errorString );
@@ -88,7 +88,7 @@ class DecoderThread: public QThread
   DecoderContext d;
 
 public:
-  DecoderThread( const QByteArray & audioData, QObject * parent );
+  DecoderThread( QByteArray const & audioData, QObject * parent );
   virtual ~DecoderThread();
 
 public slots:
@@ -96,7 +96,7 @@ public slots:
   void cancel( bool waitUntilFinished );
 
 signals:
-  void error( const QString & message );
+  void error( QString const & message );
 };
 
 } // namespace Ffmpeg

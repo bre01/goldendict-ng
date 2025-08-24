@@ -1,5 +1,7 @@
 #include "utils.hh"
 #include <QDir>
+#include <QPalette>
+#include <QStyle>
 #include <QMessageBox>
 #include <string>
 #include <QBuffer>
@@ -31,14 +33,14 @@ bool endsWithIgnoreCase( QByteArrayView str, QByteArrayView extension )
     && ( str.last( extension.size() ).compare( extension, Qt::CaseInsensitive ) == 0 );
 }
 
-QString escapeAmps( const QString & str )
+QString escapeAmps( QString const & str )
 {
   QString result( str );
   result.replace( "&", "&&" );
   return result;
 }
 
-QString unescapeAmps( const QString & str )
+QString unescapeAmps( QString const & str )
 {
   QString result( str );
   result.replace( "&&", "&" );
@@ -51,7 +53,7 @@ QString Utils::Path::combine( const QString & path1, const QString & path2 )
   return QDir::cleanPath( path1 + QDir::separator() + path2 );
 }
 
-QString Utils::Url::getSchemeAndHost( const QUrl & url )
+QString Utils::Url::getSchemeAndHost( QUrl const & url )
 {
   if ( !url.isValid() ) {
     return QString();
@@ -104,7 +106,7 @@ char separator()
   return QDir::separator().toLatin1();
 }
 
-std::string basename( const std::string & str )
+std::string basename( std::string const & str )
 {
   size_t x = str.rfind( separator() );
 
@@ -115,13 +117,13 @@ std::string basename( const std::string & str )
   return std::string( str, x + 1 );
 }
 
-void removeDirectory( const QString & directory )
+void removeDirectory( QString const & directory )
 {
   QDir dir( directory );
   dir.removeRecursively();
 }
 
-void removeDirectory( const string & directory )
+void removeDirectory( string const & directory )
 {
   removeDirectory( QString::fromStdString( directory ) );
 }

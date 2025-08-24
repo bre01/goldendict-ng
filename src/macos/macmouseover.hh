@@ -1,5 +1,3 @@
-#pragma once
-
 #ifdef __APPLE__
 
   #pragma once
@@ -31,7 +29,7 @@ public:
   void disableMouseOver();
 
   /// Set pointer to program configuration
-  void setPreferencesPtr( const Config::Preferences * ppref )
+  void setPreferencesPtr( Config::Preferences const * ppref )
   {
     pPref = ppref;
   };
@@ -44,7 +42,7 @@ public:
 signals:
 
   /// Emitted when there was some text under cursor which was hovered over.
-  void hovered( const QString &, bool forcePopup );
+  void hovered( QString const &, bool forcePopup );
 
 private slots:
   void timerShot();
@@ -57,7 +55,7 @@ private:
   QString CFStringRefToQString( CFStringRef str );
   void handleRetrievedString( QString & wordSeq, int wordSeqPos );
 
-  const Config::Preferences * pPref;
+  Config::Preferences const * pPref;
   QTimer mouseTimer;
   CFMachPortRef tapRef;
   CFRunLoopSourceRef loop;

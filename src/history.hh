@@ -27,7 +27,7 @@ public:
     QString word;
 
     // For assisting QList::contains & QList::removeOne
-    bool operator==( const Item & other ) const
+    bool operator==( Item const & other ) const
     {
       return QString::compare( word, other.word, Qt::CaseInsensitive ) == 0;
     }
@@ -40,7 +40,7 @@ public:
   /// If there was such an item already somewhere on the list, it gets removed
   /// from there. If otherwise the resulting list gets too large, the oldest
   /// item gets removed from the end of the list.
-  void addItem( const Item & );
+  void addItem( Item const & );
 
   Item getItem( int index );
 
@@ -63,7 +63,7 @@ public:
   int size() const;
 
   /// Gets the current items. The first one is the newest one on the list.
-  const QList< Item > & getItems() const
+  QList< Item > const & getItems() const
   {
     return items;
   }

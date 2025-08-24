@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QDialog>
 #include <QWebEngineView>
 #include <QWebEnginePage>
 #include <QVBoxLayout>

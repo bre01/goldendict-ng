@@ -57,7 +57,7 @@ class EpwingBook
 {
   using EWPos = std::pair< int, int >;
 
-  void setErrorString( const QString & func, EB_Error_Code code );
+  void setErrorString( QString const & func, EB_Error_Code code );
 
   EB_Book book;
   EB_Appendix appendix;
@@ -83,7 +83,7 @@ class EpwingBook
   static QMutex libMutex;
   QList< EpwingHeadword > candidateItems;
 
-  QString createCacheDir( const QString & dir );
+  QString createCacheDir( QString const & dir );
 
   // Close unslosed tags
   void finalizeText( QString & text );
@@ -105,7 +105,7 @@ class EpwingBook
 
   unsigned int normalizeDecorationCode( unsigned int code );
 
-  QByteArray codeToUnicode( const QString & code );
+  QByteArray codeToUnicode( QString const & code );
 
 public:
   const char *codec_ISO_name, *codec_GB_name, *codec_Euc_name;
@@ -127,7 +127,7 @@ public:
     return libMutex;
   }
 
-  const QString & errorString() const
+  QString const & errorString() const
   {
     return error_string;
   }
@@ -142,17 +142,17 @@ public:
     dictID = QString::fromUtf8( id.c_str() );
   }
 
-  const QString & getImagesCacheDir()
+  QString const & getImagesCacheDir()
   {
     return cacheImagesDir;
   }
 
-  const QString & getSoundsCacheDir()
+  QString const & getSoundsCacheDir()
   {
     return cacheSoundsDir;
   }
 
-  const QString & getMoviesCacheDir()
+  QString const & getMoviesCacheDir()
   {
     return cacheMoviesDir;
   }
@@ -166,20 +166,20 @@ public:
 
 
   // Make name for resource
-  QString makeFName( const QString & ext, int page, int offset ) const;
+  QString makeFName( QString const & ext, int page, int offset ) const;
   QByteArray handleCandidate( EB_Hook_Code code, const unsigned * argv );
   QString currentCandidate();
 
   // Store all files in Epwing folder
-  static void collectFilenames( const QString & directory, vector< string > & files );
+  static void collectFilenames( QString const & directory, vector< string > & files );
 
   // Initialize dictionary book
-  int setBook( const string & directory );
+  int setBook( string const & directory );
 
   // Set subbook inside dictionary
   bool setSubBook( int book_nom );
 
-  void setCacheDirectory( const QString & cacheDir );
+  void setCacheDirectory( QString const & cacheDir );
 
   QString getCurrentSubBookDirectory();
 
@@ -195,9 +195,9 @@ public:
   // Find next headword and article position
   bool getNextHeadword( EpwingHeadword & head );
 
-  bool readHeadword( const EB_Position & pos, QString & headword, bool text_only );
+  bool readHeadword( EB_Position const & pos, QString & headword, bool text_only );
 
-  bool isHeadwordCorrect( const QString & headword );
+  bool isHeadwordCorrect( QString const & headword );
 
   void fixHeadword( QString & headword );
 

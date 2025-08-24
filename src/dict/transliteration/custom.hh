@@ -18,6 +18,6 @@ private:
 };
 
 
-std::vector< sptr< Dictionary::Class > > makeDictionaries( const Config::CustomTrans & );
+std::vector< sptr< Dictionary::Class > > makeDictionaries( Config::CustomTrans const & );
 
 } // namespace CustomTranslit

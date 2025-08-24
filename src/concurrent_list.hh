@@ -3,6 +3,7 @@
 
 #pragma once
 #include <QMutex>
+#include <QMutexLocker>
 #include <list>
 using std::list;
 

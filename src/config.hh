@@ -31,12 +31,10 @@ namespace Config {
 //define a default font fize value
 constexpr int DEFAULT_FONT_SIZE = 12;
 
-const QString WEBSITE_PROXY_PREFIX = "iframe-";
-
 // Tri states enum for Dark and Dark reader mode
 enum class Dark : std::uint8_t {
-  Off  = 0,
-  On   = 1,
+  Off = 0,
+  On  = 1,
   Auto = 2,
 };
 
@@ -53,13 +51,13 @@ struct Path
     recursive( false )
   {
   }
-  Path( const QString & path_, bool recursive_ ):
+  Path( QString const & path_, bool recursive_ ):
     path( path_ ),
     recursive( recursive_ )
   {
   }
 
-  bool operator==( const Path & other ) const
+  bool operator==( Path const & other ) const
   {
     return path == other.path && recursive == other.recursive;
   }
@@ -77,14 +75,14 @@ struct SoundDir
 
   SoundDir() {}
 
-  SoundDir( const QString & path_, const QString & name_, QString iconFilename_ = "" ):
+  SoundDir( QString const & path_, QString const & name_, QString iconFilename_ = "" ):
     path( path_ ),
     name( name_ ),
     iconFilename( iconFilename_ )
   {
   }
 
-  bool operator==( const SoundDir & other ) const
+  bool operator==( SoundDir const & other ) const
   {
     return path == other.path && name == other.name && iconFilename == other.iconFilename;
   }
@@ -100,13 +98,13 @@ struct DictionaryRef
 
   DictionaryRef() {}
 
-  DictionaryRef( const QString & id_, const QString & name_ ):
+  DictionaryRef( QString const & id_, QString const & name_ ):
     id( id_ ),
     name( name_ )
   {
   }
 
-  bool operator==( const DictionaryRef & other ) const
+  bool operator==( DictionaryRef const & other ) const
   {
     return id == other.id && name == other.name;
   }
@@ -129,7 +127,7 @@ struct Group
   {
   }
 
-  bool operator==( const Group & other ) const
+  bool operator==( Group const & other ) const
   {
     return id == other.id && name == other.name && icon == other.icon && favoritesFolder == other.favoritesFolder
       && dictionaries == other.dictionaries && shortcut == other.shortcut
@@ -137,7 +135,7 @@ struct Group
       && iconData == other.iconData;
   }
 
-  bool operator!=( const Group & other ) const
+  bool operator!=( Group const & other ) const
   {
     return !operator==( other );
   }
@@ -201,7 +199,7 @@ struct HotKey
   /// 1st key without modifier will becomes `key1`
   /// 2nd key without modifier will becomes `key2`
   /// The relation between the int and qt's KeyCode should consult qt's doc
-  HotKey( const QKeySequence & );
+  HotKey( QKeySequence const & );
 
   QKeySequence toKeySequence() const;
 };
@@ -231,13 +229,13 @@ struct CustomFonts
   QString sansSerif;
   QString monospace;
 
-  bool operator==( const CustomFonts & other ) const
+  bool operator==( CustomFonts const & other ) const
   {
     return standard == other.standard && serif == other.serif && sansSerif == other.sansSerif
       && monospace == other.monospace;
   }
 
-  bool operator!=( const CustomFonts & other ) const
+  bool operator!=( CustomFonts const & other ) const
   {
     return !operator==( other );
   }
@@ -279,7 +277,6 @@ struct Preferences
 {
   QString interfaceLanguage; // Empty value corresponds to system default
   QString interfaceFont;     //Empty as default value.
-  bool enableInterfaceFont = false;
   int interfaceFontSize;
 
   CustomFonts customFonts;
@@ -325,7 +322,7 @@ struct Preferences
   bool ignoreDiacritics;
   bool ignorePunctuation;
   bool sessionCollapse = false;
-#ifdef WITH_X11
+#ifdef HAVE_X11
   bool trackClipboardScan;
   bool trackSelectionScan;
   bool showScanFlag;
@@ -371,7 +368,7 @@ struct Preferences
 
   bool limitInputPhraseLength;
   int inputPhraseLengthLimit;
-  QString sanitizeInputPhrase( const QString & inputWord ) const;
+  QString sanitizeInputPhrase( QString const & inputWord ) const;
 
   unsigned short maxDictionaryRefsInContextMenu;
 
@@ -383,7 +380,7 @@ struct Preferences
 
   // Appearances
 
-  Dark darkMode = Dark::Off;
+  Dark darkMode       = Dark::Off;
   Dark darkReaderMode =
 #if defined( Q_OS_MACOS )
     Dark::Auto;
@@ -416,12 +413,12 @@ struct MediaWiki
   {
   }
 
-  MediaWiki( const QString & id_,
-             const QString & name_,
-             const QString & url_,
+  MediaWiki( QString const & id_,
+             QString const & name_,
+             QString const & url_,
              bool enabled_,
-             const QString & icon_,
-             const QString & lang_ = "" ):
+             QString const & icon_,
+             QString const & lang_ = "" ):
     id( id_ ),
     name( name_ ),
     url( url_ ),
@@ -431,7 +428,7 @@ struct MediaWiki
   {
   }
 
-  bool operator==( const MediaWiki & other ) const
+  bool operator==( MediaWiki const & other ) const
   {
     return id == other.id && name == other.name && url == other.url && enabled == other.enabled && icon == other.icon
       && lang == other.lang;
@@ -451,11 +448,11 @@ struct WebSite
   {
   }
 
-  WebSite( const QString & id_,
-           const QString & name_,
-           const QString & url_,
+  WebSite( QString const & id_,
+           QString const & name_,
+           QString const & url_,
            bool enabled_,
-           const QString & iconFilename_,
+           QString const & iconFilename_,
            bool inside_iframe_ ):
     id( id_ ),
     name( name_ ),
@@ -466,7 +463,7 @@ struct WebSite
   {
   }
 
-  bool operator==( const WebSite & other ) const
+  bool operator==( WebSite const & other ) const
   {
     return id == other.id && name == other.name && url == other.url && enabled == other.enabled
       && iconFilename == other.iconFilename && inside_iframe == other.inside_iframe;
@@ -490,13 +487,13 @@ struct DictServer
   {
   }
 
-  DictServer( const QString & id_,
-              const QString & name_,
-              const QString & url_,
+  DictServer( QString const & id_,
+              QString const & name_,
+              QString const & url_,
               bool enabled_,
-              const QString & databases_,
-              const QString & strategies_,
-              const QString & iconFilename_ ):
+              QString const & databases_,
+              QString const & strategies_,
+              QString const & iconFilename_ ):
     id( id_ ),
     name( name_ ),
     url( url_ ),
@@ -507,7 +504,7 @@ struct DictServer
   {
   }
 
-  bool operator==( const DictServer & other ) const
+  bool operator==( DictServer const & other ) const
   {
     return id == other.id && name == other.name && url == other.url && enabled == other.enabled
       && databases == other.databases && strategies == other.strategies && iconFilename == other.iconFilename;
@@ -526,12 +523,12 @@ struct Hunspell
 
   Dictionaries enabledDictionaries;
 
-  bool operator==( const Hunspell & other ) const
+  bool operator==( Hunspell const & other ) const
   {
     return dictionariesPath == other.dictionariesPath && enabledDictionaries == other.enabledDictionaries;
   }
 
-  bool operator!=( const Hunspell & other ) const
+  bool operator!=( Hunspell const & other ) const
   {
     return !operator==( other );
   }
@@ -552,14 +549,14 @@ struct Chinese
 
   Chinese();
 
-  bool operator==( const Chinese & other ) const
+  bool operator==( Chinese const & other ) const
   {
     return enable == other.enable && enableSCToTWConversion == other.enableSCToTWConversion
       && enableSCToHKConversion == other.enableSCToHKConversion
       && enableTCToSCConversion == other.enableTCToSCConversion;
   }
 
-  bool operator!=( const Chinese & other ) const
+  bool operator!=( Chinese const & other ) const
   {
     return !operator==( other );
   }
@@ -572,12 +569,12 @@ struct CustomTrans
 
   QString context;
 
-  bool operator==( const CustomTrans & other ) const
+  bool operator==( CustomTrans const & other ) const
   {
     return enable == other.enable && context == other.context;
   }
 
-  bool operator!=( const CustomTrans & other ) const
+  bool operator!=( CustomTrans const & other ) const
   {
     return !operator==( other );
   }
@@ -593,12 +590,12 @@ struct Romaji
 
   Romaji();
 
-  bool operator==( const Romaji & other ) const
+  bool operator==( Romaji const & other ) const
   {
     return enable == other.enable && enableHiragana == other.enableHiragana && enableKatakana == other.enableKatakana;
   }
 
-  bool operator!=( const Romaji & other ) const
+  bool operator!=( Romaji const & other ) const
   {
     return !operator==( other );
   }
@@ -617,7 +614,7 @@ struct Transliteration
 #endif
   Romaji romaji;
 
-  bool operator==( const Transliteration & other ) const
+  bool operator==( Transliteration const & other ) const
   {
     return enableRussianTransliteration == other.enableRussianTransliteration
       && enableGermanTransliteration == other.enableGermanTransliteration
@@ -629,7 +626,7 @@ struct Transliteration
       romaji == other.romaji;
   }
 
-  bool operator!=( const Transliteration & other ) const
+  bool operator!=( Transliteration const & other ) const
   {
     return !operator==( other );
   }
@@ -648,12 +645,12 @@ struct Lingua
   bool enable = false;
   QString languageCodes;
 
-  bool operator==( const Lingua & other ) const
+  bool operator==( Lingua const & other ) const
   {
     return enable == other.enable && languageCodes == other.languageCodes;
   }
 
-  bool operator!=( const Lingua & other ) const
+  bool operator!=( Lingua const & other ) const
   {
     return !operator==( other );
   }
@@ -670,12 +667,12 @@ struct Forvo
   {
   }
 
-  bool operator==( const Forvo & other ) const
+  bool operator==( Forvo const & other ) const
   {
     return enable == other.enable && apiKey == other.apiKey && languageCodes == other.languageCodes;
   }
 
-  bool operator!=( const Forvo & other ) const
+  bool operator!=( Forvo const & other ) const
   {
     return !operator==( other );
   }
@@ -704,10 +701,10 @@ struct Program
 
   Program( bool enabled_,
            Type type_,
-           const QString & id_,
-           const QString & name_,
-           const QString & commandLine_,
-           const QString & iconFilename_ ):
+           QString const & id_,
+           QString const & name_,
+           QString const & commandLine_,
+           QString const & iconFilename_ ):
     enabled( enabled_ ),
     type( type_ ),
     id( id_ ),
@@ -717,13 +714,13 @@ struct Program
   {
   }
 
-  bool operator==( const Program & other ) const
+  bool operator==( Program const & other ) const
   {
     return enabled == other.enabled && type == other.type && name == other.name && commandLine == other.commandLine
       && iconFilename == other.iconFilename;
   }
 
-  bool operator!=( const Program & other ) const
+  bool operator!=( Program const & other ) const
   {
     return !operator==( other );
   }
@@ -762,14 +759,14 @@ struct VoiceEngine
   {
   }
 
-  bool operator==( const VoiceEngine & other ) const
+  bool operator==( VoiceEngine const & other ) const
   {
     return enabled == other.enabled && engine_name == other.engine_name && name == other.name
       && voice_name == other.voice_name && locale == other.locale && iconFilename == other.iconFilename
       && volume == other.volume && rate == other.rate;
   }
 
-  bool operator!=( const VoiceEngine & other ) const
+  bool operator!=( VoiceEngine const & other ) const
   {
     return !operator==( other );
   }
@@ -841,7 +838,7 @@ struct Class
   QString resourceSavePath;  // Path to save images/audio
   QString articleSavePath;   // Path to save articles
 
-  bool pinPopupWindow;                 // Last pin status
+  bool pinPopupWindow;         // Last pin status
   bool popupWindowAlwaysOnTop = false; // Last status of pinned popup window
 
   QByteArray mainWindowState;    // Binary state saved by QMainWindow
@@ -876,9 +873,9 @@ struct Class
   {
   }
   Group * getGroup( unsigned id );
-  const Group * getGroup( unsigned id ) const;
+  Group const * getGroup( unsigned id ) const;
   //disable tts dictionary. does not need to save to persistent file
-  bool notts      = false;
+  bool notts = false;
   bool resetState = false;
 };
 
@@ -918,7 +915,7 @@ DEF_EX( exMalformedConfigFile, "The configuration file is malformed", exError )
 Class load();
 
 /// Saves the configuration
-void save( const Class & );
+void save( Class const & );
 
 /// Returns the configuration file name.
 QString getConfigFileName();

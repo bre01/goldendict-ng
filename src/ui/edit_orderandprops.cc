@@ -14,7 +14,7 @@ using std::sort;
 
 namespace {
 
-bool dictNameLessThan( const sptr< Dictionary::Class > & dict1, const sptr< Dictionary::Class > & dict2 )
+bool dictNameLessThan( sptr< Dictionary::Class > const & dict1, sptr< Dictionary::Class > const & dict2 )
 {
   QString str1 = QString::fromUtf8( dict1->getName().c_str() );
   QString str2 = QString::fromUtf8( dict2->getName().c_str() );
@@ -28,7 +28,7 @@ bool dictNameLessThan( const sptr< Dictionary::Class > & dict1, const sptr< Dict
   return str1.localeAwareCompare( str2 ) < 0;
 }
 
-bool dictLessThan( const sptr< Dictionary::Class > & dict1, const sptr< Dictionary::Class > & dict2 )
+bool dictLessThan( sptr< Dictionary::Class > const & dict1, sptr< Dictionary::Class > const & dict2 )
 {
   int idFrom1 = dict1->getLangFrom();
   int idTo1   = dict1->getLangTo();
@@ -89,13 +89,19 @@ bool dictLessThan( const sptr< Dictionary::Class > & dict1, const sptr< Dictiona
 } // namespace
 
 OrderAndProps::OrderAndProps( QWidget * parent,
-                              const Config::Group & dictionaryOrder,
-                              const Config::Group & inactiveDictionaries,
-                              const std::vector< sptr< Dictionary::Class > > & allDictionaries ):
+                              Config::Group const & dictionaryOrder,
+                              Config::Group const & inactiveDictionaries,
+                              std::vector< sptr< Dictionary::Class > > const & allDictionaries ):
   QWidget( parent )
 {
   ui.setupUi( this );
-  resetData( dictionaryOrder, inactiveDictionaries, allDictionaries );
+  Instances::Group order( dictionaryOrder, allDictionaries, Config::Group() );
+  Instances::Group inactive( inactiveDictionaries, allDictionaries, Config::Group() );
+
+  Instances::complementDictionaryOrder( order, inactive, allDictionaries );
+
+  ui.dictionaryOrder->populate( order.dictionaries, allDictionaries );
+  ui.inactiveDictionaries->populate( inactive.dictionaries, allDictionaries );
 
   ui.searchLine->applyTo( ui.dictionaryOrder );
   addAction( ui.searchLine->getFocusAction() );
@@ -125,19 +131,6 @@ OrderAndProps::OrderAndProps( QWidget * parent,
   showDictNumbers();
 }
 
-void OrderAndProps::resetData( const Config::Group & dictionaryOrder,
-                               const Config::Group & inactiveDictionaries,
-                               const std::vector< sptr< Dictionary::Class > > & allDictionaries ) const
-{
-  Instances::Group order( dictionaryOrder, allDictionaries, Config::Group() );
-  Instances::Group inactive( inactiveDictionaries, allDictionaries, Config::Group() );
-
-  Instances::complementDictionaryOrder( order, inactive, allDictionaries );
-
-  ui.dictionaryOrder->populate( order.dictionaries, allDictionaries );
-  ui.inactiveDictionaries->populate( inactive.dictionaries, allDictionaries );
-}
-
 Config::Group OrderAndProps::getCurrentDictionaryOrder() const
 {
   Instances::Group g;
@@ -156,7 +149,7 @@ Config::Group OrderAndProps::getCurrentInactiveDictionaries() const
   return g.makeConfigGroup();
 }
 
-void OrderAndProps::filterChanged( const QString & filterText )
+void OrderAndProps::filterChanged( QString const & filterText )
 {
   // when the filter is active, disable the possibility
   // to drop dictionaries to this filtered list
@@ -184,7 +177,7 @@ void OrderAndProps::dictionarySelectionChanged( const QItemSelection & current, 
   describeDictionary( ui.dictionaryOrder, ui.searchLine->mapToSource( current.front().topLeft() ) );
 }
 
-void OrderAndProps::inactiveDictionarySelectionChanged( const QItemSelection & current )
+void OrderAndProps::inactiveDictionarySelectionChanged( QItemSelection const & current )
 {
   if ( current.empty() ) {
     return;
@@ -210,7 +203,7 @@ void OrderAndProps::disableDictionaryDescription()
   ui.infoVerticalLayout->invalidate();
 }
 
-void OrderAndProps::describeDictionary( DictListWidget * lst, const QModelIndex & idx )
+void OrderAndProps::describeDictionary( DictListWidget * lst, QModelIndex const & idx )
 {
   if ( !idx.isValid() || (unsigned)idx.row() >= lst->getCurrentDictionaries().size() ) {
     disableDictionaryDescription();
@@ -231,7 +224,7 @@ void OrderAndProps::describeDictionary( DictListWidget * lst, const QModelIndex 
     ui.dictionaryTranslatesFrom->setText( Language::localizedStringForId( dict->getLangFrom() ) );
     ui.dictionaryTranslatesTo->setText( Language::localizedStringForId( dict->getLangTo() ) );
 
-    const std::vector< std::string > & filenames = dict->getDictionaryFilenames();
+    std::vector< std::string > const & filenames = dict->getDictionaryFilenames();
 
     QString filenamesText;
 

@@ -9,7 +9,9 @@
 #include "keyboardstate.hh"
 #include "config.hh"
 #include "ui_scanpopup_toolbar.h"
+#include <QDialog>
 #include <QClipboard>
+#include <QToolBar>
 #include "history.hh"
 #include "dictionarybar.hh"
 #include "mainstatusbar.hh"
@@ -17,7 +19,7 @@
 #include <QActionGroup>
 #include "groupcombobox.hh"
 #include "translatebox.hh"
-#ifdef WITH_X11
+#ifdef HAVE_X11
   #include "scanflag.hh"
 #endif
 
@@ -33,9 +35,9 @@ public:
   ScanPopup( QWidget * parent,
              Config::Class & cfg,
              ArticleNetworkAccessManager &,
-             const AudioPlayerPtr &,
-             const std::vector< sptr< Dictionary::Class > > & allDictionaries,
-             const Instances::Groups &,
+             AudioPlayerPtr const &,
+             std::vector< sptr< Dictionary::Class > > const & allDictionaries,
+             Instances::Groups const &,
              History & );
 
   ~ScanPopup();
@@ -47,13 +49,13 @@ public:
   /// it's changed.
   void applyZoomFactor() const;
   /// Translate the word
-  void translateWord( const QString & word );
+  void translateWord( QString const & word );
 
   void setDictionaryIconSize();
 
   void saveConfigData() const;
 
-#ifdef WITH_X11
+#ifdef HAVE_X11
   /// Interaction with scan flag window
   void showScanFlag();
   void hideScanFlag();
@@ -66,7 +68,7 @@ signals:
   /// Forwarded from the dictionary bar, so that main window could act on this.
   void editGroupRequest( unsigned id );
   /// Send word to main window
-  void sendPhraseToMainWindow( const QString & word );
+  void sendPhraseToMainWindow( QString const & word );
   /// Close opened menus when window hide
   void closeMenu();
 
@@ -76,12 +78,12 @@ signals:
   /// Signal to add word to history even if history is disabled
   void forceAddWordToHistory( const QString & word );
   /// Retranslate signal from dictionary bar
-  void showDictionaryInfo( const QString & id );
-  void openDictionaryFolder( const QString & id );
+  void showDictionaryInfo( QString const & id );
+  void openDictionaryFolder( QString const & id );
   /// Put translated word into history
-  void sendWordToHistory( const QString & word );
+  void sendWordToHistory( QString const & word );
   /// Put translated word into Favorites
-  void sendWordToFavorites( const QString & word );
+  void sendWordToFavorites( QString const & word );
 
 #ifdef Q_OS_WIN32
   /// Ask for source window is current translate tab
@@ -92,15 +94,15 @@ public slots:
 
   void inspectElementWhenPinned( QWebEnginePage * page );
   /// Translates the word from the clipboard, showing the window etc.
-  void translateWordFromPrimaryClipboard();
+  void translateWordFromClipboard();
   /// Translates the word from the clipboard selection
   void translateWordFromSelection();
   /// From the dictionary bar.
   void editGroupRequested();
 
-  void setGroupByName( const QString & name ) const;
+  void setGroupByName( QString const & name ) const;
 
-#ifdef WITH_X11
+#ifdef HAVE_X11
   void showEngagePopup();
 #endif
   void openSearch();
@@ -121,13 +123,14 @@ private:
   // Ungrabs mouse and uninstalls global event filter.
   void uninterceptMouse();
 
+  void updateDictionaryBar();
   /// Check is word already presented in Favorites
-  bool isWordPresentedInFavorites( const QString & word ) const;
+  bool isWordPresentedInFavorites( QString const & word ) const;
 
   Config::Class & cfg;
-  const std::vector< sptr< Dictionary::Class > > & allDictionaries;
+  std::vector< sptr< Dictionary::Class > > const & allDictionaries;
   std::vector< sptr< Dictionary::Class > > dictionariesUnmuted;
-  const Instances::Groups & groups;
+  Instances::Groups const & groups;
   History & history;
   Ui::ScanPopupToolBar ui;
   TranslateBox * translateBox;
@@ -147,7 +150,7 @@ private:
   /// Fonts saved before words zooming is in effect, so it could be reset back.
   QFont wordListDefaultFont, translateLineDefaultFont, groupListDefaultFont;
 
-#ifdef WITH_X11
+#ifdef HAVE_X11
   ScanFlag * scanFlag;
 #endif
 
@@ -166,16 +169,16 @@ private:
   QIcon starIcon     = QIcon( ":/icons/star.svg" );
   QIcon blueStarIcon = QIcon( ":/icons/star_blue.svg" );
 
-  void handleInputWord( const QString &, bool forcePopup = false );
+  void handleInputWord( QString const &, bool forcePopup = false );
   void engagePopup( bool forcePopup, bool giveFocus = false );
 
-  const vector< sptr< Dictionary::Class > > & getActiveDicts();
+  vector< sptr< Dictionary::Class > > const & getActiveDicts();
 
   virtual bool eventFilter( QObject * watched, QEvent * event );
 
   /// Called from event filter or from mouseGrabPoll to handle mouse event
   /// while it is being intercepted.
-  void reactOnMouseMove( const QPointF & p );
+  void reactOnMouseMove( QPointF const & p );
 
   virtual void mousePressEvent( QMouseEvent * );
   virtual void mouseMoveEvent( QMouseEvent * );
@@ -191,16 +194,16 @@ private:
 
   void updateBackForwardButtons() const;
 
-  void showTranslationFor( const QString & inputPhrase ) const;
+  void showTranslationFor( QString const & inputPhrase ) const;
 
   void updateSuggestionList();
-  void updateSuggestionList( const QString & text );
+  void updateSuggestionList( QString const & text );
 private slots:
   void currentGroupChanged( int );
   void prefixMatchFinished();
   void pinButtonClicked( bool checked );
   void dictionaryBar_visibility_changed( bool visible );
-  void showStatusBarMessage( const QString &, int, const QPixmap & ) const;
+  void showStatusBarMessage( QString const &, int, QPixmap const & ) const;
 
   void pronounceButton_clicked() const;
   void sendWordButton_clicked();
@@ -224,17 +227,17 @@ private slots:
 
   void switchExpandOptionalPartsMode();
 
-  void translateInputChanged( const QString & text );
+  void translateInputChanged( QString const & text );
   void translateInputFinished();
 
   void focusTranslateLine();
   void stopAudio() const;
 
-  void typingEvent( const QString & );
+  void typingEvent( QString const & );
 
   void alwaysOnTopClicked( bool checked );
 
-  void titleChanged( ArticleView *, const QString & title ) const;
+  void titleChanged( ArticleView *, QString const & title ) const;
   void updateFoundInDictsList();
   void onActionTriggered();
 };

@@ -11,6 +11,6 @@
 namespace Forvo {
 
 std::vector< sptr< Dictionary::Class > >
-makeDictionaries( Dictionary::Initializing &, const Config::Forvo &, QNetworkAccessManager & );
+makeDictionaries( Dictionary::Initializing &, Config::Forvo const &, QNetworkAccessManager & );
 
 } // namespace Forvo

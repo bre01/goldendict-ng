@@ -4,7 +4,7 @@
 #include "dictionary_group.hh"
 
 
-sptr< Dictionary::Class > DictionaryGroup::getDictionaryByName( const QString & dictName )
+sptr< Dictionary::Class > DictionaryGroup::getDictionaryByName( QString const & dictName )
 {
   // Link to other dictionary
   for ( const auto & allDictionarie : allDictionaries ) {
@@ -17,7 +17,7 @@ sptr< Dictionary::Class > DictionaryGroup::getDictionaryByName( const QString & 
 
 const std::vector< sptr< Dictionary::Class > > * DictionaryGroup::getActiveDictionaries( unsigned currentGroup )
 {
-  const std::vector< sptr< Dictionary::Class > > * activeDicts = nullptr;
+  std::vector< sptr< Dictionary::Class > > const * activeDicts = nullptr;
 
   if ( !groups.empty() ) {
     for ( const auto & group : groups ) {
@@ -46,7 +46,7 @@ sptr< Dictionary::Class > DictionaryGroup::getDictionaryById( const std::string 
   return nullptr;
 }
 
-const Instances::Group * DictionaryGroup::getGroupById( unsigned groupId )
+Instances::Group const * DictionaryGroup::getGroupById( unsigned groupId )
 {
   return groups.findGroup( groupId );
 }

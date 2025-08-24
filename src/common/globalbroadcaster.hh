@@ -1,7 +1,10 @@
 #pragma once
 
+#include <QObject>
+#include <vector>
 #include "config.hh"
 #include "pronounceengine.hh"
+#include <QCache>
 #include "dictionary_icon_name.hh"
 
 struct ActiveDictIds
@@ -40,7 +43,7 @@ public:
   std::function< bool( const QString & ) > isWordPresentedInFavorites;
 
   PronounceEngine pronounce_engine;
-  QString getAbbrName( const QString & text );
+  QString getAbbrName( QString const & text );
 signals:
   void dictionaryChanges( ActiveDictIds ad );
   void dictionaryClear( ActiveDictIds ad );

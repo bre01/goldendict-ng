@@ -2,6 +2,8 @@
 #include "language.hh"
 #include "preferences.hh"
 #include "help.hh"
+
+#include <QDebug>
 #include <QDir>
 #include <QFontDatabase>
 #include <QMessageBox>
@@ -15,7 +17,7 @@ Preferences::Preferences( QWidget * parent, Config::Class & cfg_ ):
   cfg( cfg_ ),
   helpAction( this )
 {
-  const Config::Preferences & p = cfg_.preferences;
+  Config::Preferences const & p = cfg_.preferences;
   ui.setupUi( this );
 
   connect( ui.enableScanPopupModifiers,
@@ -49,29 +51,23 @@ Preferences::Preferences( QWidget * parent, Config::Class & cfg_ ):
   connect( ui.interfaceFontSize, &QSpinBox::valueChanged, this, [ this ]( int size ) {
     previewInterfaceFont( ui.systemFont->currentText(), size );
   } );
-
-  connect( ui.enableInterfaceFont, &QGroupBox::toggled, this, [ this ]( bool on ) {
-    previewInterfaceFont( ui.systemFont->currentText(), ui.interfaceFontSize->value() );
-  } );
-
   previewInterfaceFont( ui.systemFont->currentText(), ui.interfaceFontSize->value() );
 
   addAction( &helpAction );
 
   // Load values into form
+
   ui.interfaceLanguage->addItem( tr( "System default" ), QString() );
 
-  {
-    QMap< QString, QString > sortedTranslations;
+  // We need to sort by language name, otherwise list looks really weird
+  QMultiMap< QString, QString > sortedLocs;
 
-    // translate and sort languages
-    for ( const auto & [ k, v ] : Language::translationLangMap().asKeyValueRange() ) {
-      sortedTranslations.insert( Language::translationNameFromLangCode( k ), v );
-    }
+  for ( const auto & [ locale, _ ] : Language::languageMap().asKeyValueRange() ) {
+    sortedLocs.insert( Language::languageForLocale( locale ), locale );
+  }
 
-    for ( const auto & [ k, v ] : sortedTranslations.asKeyValueRange() ) {
-      ui.interfaceLanguage->addItem( k, v );
-    }
+  for ( auto i = sortedLocs.begin(); i != sortedLocs.end(); ++i ) {
+    ui.interfaceLanguage->addItem( i.key(), i.value() );
   }
 
   for ( int x = 0; x < ui.interfaceLanguage->count(); ++x ) {
@@ -86,7 +82,6 @@ Preferences::Preferences( QWidget * parent, Config::Class & cfg_ ):
   if ( !p.interfaceFont.isEmpty() ) {
     ui.systemFont->setCurrentText( p.interfaceFont );
   }
-  ui.enableInterfaceFont->setChecked( p.enableInterfaceFont );
 
   if ( p.interfaceFontSize > 0 ) {
     ui.interfaceFontSize->setValue( p.interfaceFontSize );
@@ -281,7 +276,7 @@ Preferences::Preferences( QWidget * parent, Config::Class & cfg_ ):
 
   //Platform-specific options
 
-#ifdef WITH_X11
+#ifdef HAVE_X11
   ui.enableX11SelectionTrack->setChecked( p.trackSelectionScan );
   ui.enableClipboardTrack->setChecked( p.trackClipboardScan );
   ui.showScanFlag->setChecked( p.showScanFlag );
@@ -374,23 +369,9 @@ Preferences::Preferences( QWidget * parent, Config::Class & cfg_ ):
   ui.removeInvalidIndexOnExit->setChecked( p.removeInvalidIndexOnExit );
   ui.enableApplicationLog->setChecked( p.enableApplicationLog );
 
-  //initialize add-on styles
-  QString stylesDir = Config::getStylesDir();
-  if ( !stylesDir.isEmpty() ) {
-    ui.addonStyles->clear();
-
-    ui.addonStyles->addItem( tr( "None" ) );
-
-    QDir dir( stylesDir );
-    QStringList styles = dir.entryList( QDir::Dirs | QDir::NoDotAndDotDot, QDir::LocaleAware );
-    if ( !styles.isEmpty() ) {
-      ui.addonStyles->addItems( styles );
-    }
-  }
-  ui.addonStyles->setVisible( ui.addonStyles->count() > 1 );
   // Add-on styles
   ui.addonStylesLabel->setVisible( ui.addonStyles->count() > 1 );
-  ui.addonStyles->setCurrentText( p.addonStyle );
+  ui.addonStyles->setCurrentStyle( p.addonStyle );
 
   // Full-text search parameters
   ui.ftsGroupBox->setChecked( p.fts.enabled );
@@ -421,16 +402,9 @@ Preferences::Preferences( QWidget * parent, Config::Class & cfg_ ):
 }
 void Preferences::previewInterfaceFont( QString family, int size )
 {
-  auto fontName = family;
-  auto fontSize = size;
-  if ( !ui.enableInterfaceFont->isChecked() ) {
-    QFont defaultFont = QFontDatabase::systemFont( QFontDatabase::SystemFont::GeneralFont );
-    fontName          = defaultFont.family();
-    fontSize          = defaultFont.pixelSize() > -1 ? defaultFont.pixelSize() : Config::DEFAULT_FONT_SIZE;
-  }
   QFont f = QApplication::font();
-  f.setFamily( fontName );
-  f.setPixelSize( fontSize );
+  f.setFamily( family );
+  f.setPixelSize( size );
   this->ui.previewFont->setFont( f );
 }
 
@@ -450,9 +424,8 @@ Config::Preferences Preferences::getPreferences()
 
   p.interfaceLanguage = ui.interfaceLanguage->itemData( ui.interfaceLanguage->currentIndex() ).toString();
 
-  p.interfaceFont       = ui.systemFont->currentText();
-  p.interfaceFontSize   = ui.interfaceFontSize->value();
-  p.enableInterfaceFont = ui.enableInterfaceFont->isChecked();
+  p.interfaceFont = ui.systemFont->currentText();
+  p.interfaceFontSize = ui.interfaceFontSize->value();
 
   Config::CustomFonts c;
   c.standard    = ui.font_standard->currentText();
@@ -498,7 +471,7 @@ Config::Preferences Preferences::getPreferences()
 
   p.ignoreOwnClipboardChanges = ui.ignoreOwnClipboardChanges->isChecked();
   p.scanToMainWindow          = ui.scanToMainWindow->isChecked();
-#ifdef WITH_X11
+#ifdef HAVE_X11
   p.trackSelectionScan        = ui.enableX11SelectionTrack->isChecked();
   p.trackClipboardScan        = ui.enableClipboardTrack->isChecked();
   p.showScanFlag              = ui.showScanFlag->isChecked();
@@ -564,7 +537,7 @@ Config::Preferences Preferences::getPreferences()
   p.removeInvalidIndexOnExit = ui.removeInvalidIndexOnExit->isChecked();
   p.enableApplicationLog     = ui.enableApplicationLog->isChecked();
 
-  p.addonStyle = ui.addonStyles->currentText();
+  p.addonStyle = ui.addonStyles->getCurrentStyle();
 
   p.fts.enabled           = ui.ftsGroupBox->isChecked();
   p.fts.maxDictionarySize = ui.maxDictionarySize->value();

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <string>
 #include <QMap>
+#include <vector>
+#include <mutex>
 #include <QString>
 #include <QMutex>
 

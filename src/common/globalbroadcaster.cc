@@ -6,10 +6,10 @@ Q_GLOBAL_STATIC( GlobalBroadcaster, bdcaster )
 GlobalBroadcaster::GlobalBroadcaster( QObject * parent ):
   QObject( parent )
 {
-  QStringList whiteUrlHosts = { "googleapis.com", "gstatic.com" };
+  QStringList whiteUrlHosts = { "ajax.googleapis.com" };
 
   for ( auto & host : std::as_const( whiteUrlHosts ) ) {
-    whitelist.insert( host );
+    addWhitelist( host );
   }
 }
 
@@ -30,20 +30,17 @@ Config::Preferences * GlobalBroadcaster::getPreference() const
 void GlobalBroadcaster::addWhitelist( QString url )
 {
   whitelist.insert( url );
+  const auto baseUrl = Utils::Url::getHostBase( url );
+  whitelist.insert( baseUrl );
 }
 
 bool GlobalBroadcaster::existedInWhitelist( QString url ) const
 {
-  for ( const QString & item : whitelist ) {
-    if ( url.endsWith( item ) ) {
-      return true; // Match found
-    }
-  }
-  return false; // No match found
+  return whitelist.contains( url );
 }
 
 
-QString GlobalBroadcaster::getAbbrName( const QString & text )
+QString GlobalBroadcaster::getAbbrName( QString const & text )
 {
   if ( text.isEmpty() ) {
     return {};

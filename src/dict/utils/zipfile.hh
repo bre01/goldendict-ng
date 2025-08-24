@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <QFile>
 #include <QDateTime>
 #include "splitfile.hh"
 

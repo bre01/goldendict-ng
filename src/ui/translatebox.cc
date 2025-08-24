@@ -8,6 +8,9 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QApplication>
+#include <QModelIndex>
+#include <QScrollBar>
+#include <QStyle>
 #include <QStringListModel>
 #include <QTimer>
 

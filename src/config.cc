@@ -3,8 +3,12 @@
 
 #include "config.hh"
 #include "folding.hh"
+#include <QSaveFile>
+#include <QFile>
 #include <QtXml>
 #include <QApplication>
+#include <QStyle>
+#include <QFont>
 
 #ifdef Q_OS_WIN32
   //this is a windows header file.
@@ -15,8 +19,10 @@
 
 #include <QStandardPaths>
 
-#if defined( Q_OS_UNIX ) && !defined( Q_OS_MACOS )
+#if defined( HAVE_X11 )
   // Whether XDG Base Directory specification might be followed.
+  // Only Qt5 builds are supported, as Qt4 doesn't provide all functions needed
+  // to get XDG Base Directory compliant locations.
   #define XDG_BASE_DIRECTORY_COMPLIANCE
 #endif
 
@@ -54,7 +60,7 @@ QDir getHomeDir()
 #ifdef Q_OS_WIN32
   if ( result.cd( "Application Data/GoldenDict" ) )
     return result;
-  const char * pathInHome = "GoldenDict";
+  char const * pathInHome = "GoldenDict";
   result                  = QDir::fromNativeSeparators( QString::fromWCharArray( _wgetenv( L"APPDATA" ) ) );
 #else
   char const * pathInHome = ".goldendict";
@@ -96,7 +102,7 @@ AnkiConnectServer::AnkiConnectServer():
 {
 }
 
-HotKey::HotKey( const QKeySequence & seq ):
+HotKey::HotKey( QKeySequence const & seq ):
   modifiers( seq[ 0 ].keyboardModifiers() ),
   key1( seq[ 0 ].key() ),
   key2( seq[ 1 ].key() )
@@ -113,7 +119,7 @@ QKeySequence HotKey::toKeySequence() const
   ;
 }
 
-QString Preferences::sanitizeInputPhrase( const QString & inputWord ) const
+QString Preferences::sanitizeInputPhrase( QString const & inputWord ) const
 {
   QString result = inputWord;
   if ( stripClipboard ) {
@@ -164,7 +170,7 @@ Preferences::Preferences():
   scanToMainWindow( false ),
   ignoreDiacritics( false ),
   ignorePunctuation( true ),
-#ifdef WITH_X11
+#ifdef HAVE_X11
   // Enable both Clipboard and Selection by default so that X users can enjoy full
   // power and disable optionally.
   trackClipboardScan( true ),
@@ -225,7 +231,7 @@ Group * Class::getGroup( unsigned id )
   return 0;
 }
 
-const Group * Class::getGroup( unsigned id ) const
+Group const * Class::getGroup( unsigned id ) const
 {
   for ( const auto & group : groups ) {
     if ( group.id == id ) {
@@ -359,7 +365,7 @@ Programs makeDefaultPrograms()
 
 /// Sets option to true of false if node is "1" or "0" respectively, or leaves
 /// it intact if it's neither "1" nor "0".
-void applyBoolOption( bool & option, const QDomNode & node )
+void applyBoolOption( bool & option, QDomNode const & node )
 {
   QString value = node.toElement().text();
 
@@ -430,7 +436,7 @@ MutedDictionaries loadMutedDictionaries( const QDomNode & mutedDictionaries )
   return result;
 }
 
-void saveMutedDictionaries( QDomDocument & dd, QDomElement & muted, const MutedDictionaries & mutedDictionaries )
+void saveMutedDictionaries( QDomDocument & dd, QDomElement & muted, MutedDictionaries const & mutedDictionaries )
 {
   for ( const auto & mutedDictionarie : mutedDictionaries ) {
     QDomElement dict = dd.createElement( "mutedDictionary" );
@@ -697,7 +703,7 @@ Class load()
       p.name         = pr.attribute( "name" );
       p.commandLine  = pr.attribute( "commandLine" );
       p.enabled      = ( pr.attribute( "enabled" ) == "1" );
-      p.type         = (Program::Type)( pr.attribute( "type" ).toInt() );
+      p.type         = ( Program::Type )( pr.attribute( "type" ).toInt() );
       p.iconFilename = pr.attribute( "icon" );
 
       c.programs.push_back( p );
@@ -828,11 +834,6 @@ Class load()
     else {
       c.preferences.interfaceFontSize = Config::DEFAULT_FONT_SIZE;
     }
-    auto enableInterfaceFont = preferences.namedItem( "enableInterfaceFont" );
-    if ( !enableInterfaceFont.isNull() ) {
-      c.preferences.enableInterfaceFont = enableInterfaceFont.toElement().text() == "1";
-    }
-
 #if !defined( Q_OS_WIN )
     c.preferences.interfaceStyle = preferences.namedItem( "interfaceStyle" ).toElement().text();
 #endif
@@ -848,9 +849,9 @@ Class load()
     c.preferences.startToTray    = ( preferences.namedItem( "startToTray" ).toElement().text() == "1" );
     c.preferences.closeToTray    = ( preferences.namedItem( "closeToTray" ).toElement().text() == "1" );
 #endif
-    c.preferences.autoStart    = ( preferences.namedItem( "autoStart" ).toElement().text() == "1" );
-    c.preferences.alwaysOnTop  = ( preferences.namedItem( "alwaysOnTop" ).toElement().text() == "1" );
-    c.preferences.searchInDock = ( preferences.namedItem( "searchInDock" ).toElement().text() == "1" );
+    c.preferences.autoStart      = ( preferences.namedItem( "autoStart" ).toElement().text() == "1" );
+    c.preferences.alwaysOnTop    = ( preferences.namedItem( "alwaysOnTop" ).toElement().text() == "1" );
+    c.preferences.searchInDock   = ( preferences.namedItem( "searchInDock" ).toElement().text() == "1" );
 
     if ( !preferences.namedItem( "customFonts" ).isNull() ) {
       CustomFonts fonts         = CustomFonts::fromElement( preferences.namedItem( "customFonts" ).toElement() );
@@ -921,7 +922,7 @@ Class load()
       c.preferences.sessionCollapse = ( preferences.namedItem( "sessionCollapse" ).toElement().text() == "1" );
     }
 
-#ifdef WITH_X11
+#ifdef HAVE_X11
     c.preferences.trackClipboardScan = ( preferences.namedItem( "trackClipboardScan" ).toElement().text() == "1" );
     c.preferences.trackSelectionScan = ( preferences.namedItem( "trackSelectionScan" ).toElement().text() == "1" );
     c.preferences.showScanFlag       = ( preferences.namedItem( "showScanFlag" ).toElement().text() == "1" );
@@ -1227,7 +1228,7 @@ Class load()
 }
 
 namespace {
-void saveGroup( const Group & data, QDomElement & group )
+void saveGroup( Group const & data, QDomElement & group )
 {
   QDomDocument dd = group.ownerDocument();
 
@@ -1311,7 +1312,7 @@ void saveGroup( const Group & data, QDomElement & group )
 
 } // namespace
 
-void save( const Class & c )
+void save( Class const & c )
 {
   QSaveFile configFile( getConfigFileName() );
 
@@ -1738,10 +1739,6 @@ void save( const Class & c )
     opt.appendChild( dd.createTextNode( QString::number( c.preferences.interfaceFontSize ) ) );
     preferences.appendChild( opt );
 
-    opt = dd.createElement( "enableInterfaceFont" );
-    opt.appendChild( dd.createTextNode( c.preferences.enableInterfaceFont ? "1" : "0" ) );
-    preferences.appendChild( opt );
-
     opt             = dd.createElement( "customFonts" );
     auto customFont = c.preferences.customFonts.toElement( dd );
     preferences.appendChild( customFont );
@@ -1872,7 +1869,7 @@ void save( const Class & c )
     opt.appendChild( dd.createTextNode( c.preferences.sessionCollapse ? "1" : "0" ) );
     preferences.appendChild( opt );
 
-#ifdef WITH_X11
+#ifdef HAVE_X11
     opt = dd.createElement( "trackClipboardScan" );
     opt.appendChild( dd.createTextNode( c.preferences.trackClipboardScan ? "1" : "0" ) );
     preferences.appendChild( opt );
@@ -2417,7 +2414,7 @@ QString getStylesDir()
 QString getCacheDir() noexcept
 {
   return isPortableVersion() ? portableHomeDirPath() + "/cache"
-#if defined( Q_OS_UNIX ) && !defined( Q_OS_MACOS )
+#ifdef HAVE_X11
                                :
                                QStandardPaths::writableLocation( QStandardPaths::GenericCacheLocation ) + "/goldendict";
 #else

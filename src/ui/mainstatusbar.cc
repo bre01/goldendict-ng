@@ -6,6 +6,7 @@
 #include <Qt>
 #include <QFrame>
 #include <QVBoxLayout>
+#include <QEvent>
 #include <QApplication>
 
 MainStatusBar::MainStatusBar( QWidget * parent ):

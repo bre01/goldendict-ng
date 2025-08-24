@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include "dictionary.hh"
+#include "indexedzip.hh"
 
 /// Xdxf is an xml file format. Since we display html, we'd like to be able
 /// to convert articles with such a markup to an html.
@@ -21,9 +22,9 @@ using std::map;
 
 /// Converts the given xdxf markup to an html one. This is currently used
 /// for Stardict's 'x' records.
-string convert( const string &,
+string convert( string const &,
                 DICT_TYPE type,
-                const map< string, string > * pAbrv,
+                map< string, string > const * pAbrv,
                 Dictionary::Class * dictPtr,
                 bool isLogicalFormat    = false,
                 unsigned revisionNumber = 0,

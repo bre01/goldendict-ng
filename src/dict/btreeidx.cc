@@ -4,7 +4,9 @@
 #include "btreeidx.hh"
 #include "folding.hh"
 #include "text.hh"
+#include <math.h>
 #include <string.h>
+#include <stdlib.h>
 #include "utils.hh"
 
 #include <QRegularExpression>
@@ -29,19 +31,19 @@ BtreeIndex::BtreeIndex():
 {
 }
 
-BtreeDictionary::BtreeDictionary( const string & id, const vector< string > & dictionaryFiles ):
+BtreeDictionary::BtreeDictionary( string const & id, vector< string > const & dictionaryFiles ):
   Dictionary::Class( id, dictionaryFiles )
 {
 }
 
-const string & BtreeDictionary::ensureInitDone()
+string const & BtreeDictionary::ensureInitDone()
 {
   static string empty;
 
   return empty;
 }
 
-void BtreeIndex::openIndex( const IndexInfo & indexInfo, File::Index & file, QMutex & mutex )
+void BtreeIndex::openIndex( IndexInfo const & indexInfo, File::Index & file, QMutex & mutex )
 {
   indexNodeSize = indexInfo.btreeMaxElements;
   rootOffset    = indexInfo.rootOffset;
@@ -54,7 +56,7 @@ void BtreeIndex::openIndex( const IndexInfo & indexInfo, File::Index & file, QMu
 }
 
 vector< WordArticleLink >
-BtreeIndex::findArticles( const std::u32string & search_word, bool ignoreDiacritics, uint32_t maxMatchCount )
+BtreeIndex::findArticles( std::u32string const & search_word, bool ignoreDiacritics, uint32_t maxMatchCount )
 {
   //First trim ending zero
   std::u32string word = Text::removeTrailingZero( search_word );
@@ -71,9 +73,9 @@ BtreeIndex::findArticles( const std::u32string & search_word, bool ignoreDiacrit
     vector< char > leaf;
     uint32_t nextLeaf;
 
-    const char * leafEnd;
+    char const * leafEnd;
 
-    const char * chainOffset = findChainOffsetExactOrPrefix( folded, exactMatch, leaf, nextLeaf, leafEnd );
+    char const * chainOffset = findChainOffsetExactOrPrefix( folded, exactMatch, leaf, nextLeaf, leafEnd );
 
     if ( chainOffset && exactMatch ) {
       result = readChain( chainOffset, maxMatchCount );
@@ -95,7 +97,7 @@ BtreeIndex::findArticles( const std::u32string & search_word, bool ignoreDiacrit
 
 
 BtreeWordSearchRequest::BtreeWordSearchRequest( BtreeDictionary & dict_,
-                                                const std::u32string & str_,
+                                                std::u32string const & str_,
                                                 unsigned minLength_,
                                                 int maxSuffixVariation_,
                                                 bool allowMiddleMatches_,
@@ -249,9 +251,9 @@ void BtreeWordSearchRequest::findMatches()
       bool exactMatch;
       vector< char > leaf;
       uint32_t nextLeaf;
-      const char * leafEnd;
+      char const * leafEnd;
 
-      const char * chainOffset = dict.findChainOffsetExactOrPrefix( folded, exactMatch, leaf, nextLeaf, leafEnd );
+      char const * chainOffset = dict.findChainOffsetExactOrPrefix( folded, exactMatch, leaf, nextLeaf, leafEnd );
 
       if ( chainOffset ) {
         for ( ;; ) {
@@ -387,14 +389,14 @@ BtreeWordSearchRequest::~BtreeWordSearchRequest()
   f.waitForFinished();
 }
 
-sptr< Dictionary::WordSearchRequest > BtreeDictionary::prefixMatch( const std::u32string & str,
+sptr< Dictionary::WordSearchRequest > BtreeDictionary::prefixMatch( std::u32string const & str,
                                                                     unsigned long maxResults )
 
 {
   return std::make_shared< BtreeWordSearchRequest >( *this, str, 0, -1, true, maxResults );
 }
 
-sptr< Dictionary::WordSearchRequest > BtreeDictionary::stemmedMatch( const std::u32string & str,
+sptr< Dictionary::WordSearchRequest > BtreeDictionary::stemmedMatch( std::u32string const & str,
                                                                      unsigned minLength,
                                                                      unsigned maxSuffixVariation,
                                                                      unsigned long maxResults )
@@ -432,11 +434,11 @@ void BtreeIndex::readNode( uint32_t offset, vector< char > & out )
   }
 }
 
-const char * BtreeIndex::findChainOffsetExactOrPrefix( const std::u32string & target,
+char const * BtreeIndex::findChainOffsetExactOrPrefix( std::u32string const & target,
                                                        bool & exactMatch,
                                                        vector< char > & extLeaf,
                                                        uint32_t & nextLeaf,
-                                                       const char *& leafEnd )
+                                                       char const *& leafEnd )
 {
   if ( !idxFile ) {
     throw exIndexWasNotOpened();
@@ -460,7 +462,7 @@ const char * BtreeIndex::findChainOffsetExactOrPrefix( const std::u32string & ta
     rootNodeLoaded = true;
   }
 
-  const char * leaf = &rootNode.front();
+  char const * leaf = &rootNode.front();
   leafEnd           = leaf + rootNode.size();
 
   if ( target.empty() ) {
@@ -501,24 +503,24 @@ const char * BtreeIndex::findChainOffsetExactOrPrefix( const std::u32string & ta
 
       //qDebug( "=>a node" );
 
-      const uint32_t * offsets = (uint32_t *)leaf + 1;
+      uint32_t const * offsets = (uint32_t *)leaf + 1;
 
-      const char * ptr = leaf + sizeof( uint32_t ) + ( indexNodeSize + 1 ) * sizeof( uint32_t );
+      char const * ptr = leaf + sizeof( uint32_t ) + ( indexNodeSize + 1 ) * sizeof( uint32_t );
 
       // ptr now points to a span of zero-separated strings, up to leafEnd.
       // We find our match using a binary search.
 
-      const char * closestString;
+      char const * closestString;
 
       int compareResult;
 
-      const char * window = ptr;
+      char const * window = ptr;
       unsigned windowSize = leafEnd - ptr;
 
       for ( ;; ) {
         // We boldly shoot in the middle of the whole mess, and then adjust
         // to the beginning of the string that we've hit.
-        const char * testPoint = window + windowSize / 2;
+        char const * testPoint = window + windowSize / 2;
 
         closestString = testPoint;
 
@@ -563,7 +565,7 @@ const char * BtreeIndex::findChainOffsetExactOrPrefix( const std::u32string & ta
 
       unsigned entry = 0;
 
-      for ( const char * next = ptr; next != closestString; next += strlen( next ) + 1, ++entry ) {
+      for ( char const * next = ptr; next != closestString; next += strlen( next ) + 1, ++entry ) {
         ;
       }
 
@@ -610,14 +612,14 @@ const char * BtreeIndex::findChainOffsetExactOrPrefix( const std::u32string & ta
       }
 
       // Build an array containing all chain pointers
-      const char * ptr = leaf + sizeof( uint32_t );
+      char const * ptr = leaf + sizeof( uint32_t );
 
       uint32_t chainSize;
 
-      vector< const char * > chainOffsets( leafEntries );
+      vector< char const * > chainOffsets( leafEntries );
 
       {
-        const char ** nextOffset = &chainOffsets.front();
+        char const ** nextOffset = &chainOffsets.front();
 
         while ( leafEntries-- ) {
           *nextOffset++ = ptr;
@@ -633,13 +635,13 @@ const char * BtreeIndex::findChainOffsetExactOrPrefix( const std::u32string & ta
       // Now do a binary search in it, aiming to find where our target
       // string lands.
 
-      const char ** window = &chainOffsets.front();
+      char const ** window = &chainOffsets.front();
       unsigned windowSize  = chainOffsets.size();
 
       for ( ;; ) {
         //qDebug( "window = %u, ws = %u", window - &chainOffsets.front(), windowSize );
 
-        const char ** chainToCheck = window + windowSize / 2;
+        char const ** chainToCheck = window + windowSize / 2;
         ptr                        = *chainToCheck;
 
         memcpy( &chainSize, ptr, sizeof( uint32_t ) );
@@ -712,7 +714,7 @@ const char * BtreeIndex::findChainOffsetExactOrPrefix( const std::u32string & ta
   }
 }
 
-vector< WordArticleLink > BtreeIndex::readChain( const char *& ptr, uint32_t maxMatchCount )
+vector< WordArticleLink > BtreeIndex::readChain( char const *& ptr, uint32_t maxMatchCount )
 {
   uint32_t chainSize;
 
@@ -748,7 +750,7 @@ vector< WordArticleLink > BtreeIndex::readChain( const char *& ptr, uint32_t max
   return result;
 }
 
-void BtreeIndex::antialias( const std::u32string & str, vector< WordArticleLink > & chain, bool ignoreDiacritics )
+void BtreeIndex::antialias( std::u32string const & str, vector< WordArticleLink > & chain, bool ignoreDiacritics )
 {
   std::u32string caseFolded = Folding::applySimpleCaseOnly( Text::normalize( str ) );
   if ( ignoreDiacritics ) {
@@ -809,7 +811,7 @@ static uint32_t buildBtreeNode( IndexedWords::const_iterator & nextIndex,
     for ( unsigned x = indexSize; x--; ++nextWord ) {
       totalChainsLength += sizeof( uint32_t );
 
-      const vector< WordArticleLink > & chain = nextWord->second;
+      vector< WordArticleLink > const & chain = nextWord->second;
 
       for ( const auto & y : chain ) {
         totalChainsLength += y.word.size() + 1 + y.prefix.size() + 1 + sizeof( uint32_t );
@@ -824,7 +826,7 @@ static uint32_t buildBtreeNode( IndexedWords::const_iterator & nextIndex,
     unsigned char * ptr = &uncompressedData.front() + sizeof( uint32_t );
 
     for ( unsigned x = indexSize; x--; ++nextIndex ) {
-      const vector< WordArticleLink > & chain = nextIndex->second;
+      vector< WordArticleLink > const & chain = nextIndex->second;
 
       unsigned char * saveSizeHere = ptr;
 
@@ -921,7 +923,7 @@ static uint32_t buildBtreeNode( IndexedWords::const_iterator & nextIndex,
   return offset;
 }
 
-void IndexedWords::addWord( const std::u32string & index_word, uint32_t articleOffset, unsigned int maxHeadwordSize )
+void IndexedWords::addWord( std::u32string const & index_word, uint32_t articleOffset, unsigned int maxHeadwordSize )
 {
   std::u32string word        = Text::removeTrailingZero( index_word );
   string::size_type wordSize = word.size();
@@ -943,7 +945,7 @@ void IndexedWords::addWord( const std::u32string & index_word, uint32_t articleO
 
     wordSize = word.size();
   }
-  const char32_t * wordBegin = word.c_str();
+  char32_t const * wordBegin = word.c_str();
 
   // Skip any leading whitespace
   while ( *wordBegin && Folding::isWhitespace( *wordBegin ) ) {
@@ -956,7 +958,7 @@ void IndexedWords::addWord( const std::u32string & index_word, uint32_t articleO
     --wordSize;
   }
 
-  const char32_t * nextChar = wordBegin;
+  char32_t const * nextChar = wordBegin;
 
   vector< char > utfBuffer( wordSize * 4 );
 
@@ -1018,9 +1020,9 @@ void IndexedWords::addWord( const std::u32string & index_word, uint32_t articleO
   }
 }
 
-void IndexedWords::addSingleWord( const std::u32string & index_word, uint32_t articleOffset )
+void IndexedWords::addSingleWord( std::u32string const & index_word, uint32_t articleOffset )
 {
-  const std::u32string & word = Text::removeTrailingZero( index_word );
+  std::u32string const & word = Text::removeTrailingZero( index_word );
   std::u32string folded       = Folding::apply( word );
   if ( folded.empty() ) {
     folded = Folding::applyWhitespaceOnly( word );
@@ -1028,7 +1030,7 @@ void IndexedWords::addSingleWord( const std::u32string & index_word, uint32_t ar
   operator[]( Text::toUtf8( folded ) ).emplace_back( Text::toUtf8( word ), articleOffset );
 }
 
-IndexInfo buildIndex( const IndexedWords & indexedWords, File::Index & file )
+IndexInfo buildIndex( IndexedWords const & indexedWords, File::Index & file )
 {
   size_t indexSize = indexedWords.size();
   auto nextIndex   = indexedWords.begin();
@@ -1100,9 +1102,9 @@ void BtreeIndex::findArticleLinks( QList< WordArticleLink > * articleLinks,
     rootNodeLoaded = true;
   }
 
-  const char * leaf     = &rootNode.front();
-  const char * leafEnd  = leaf + rootNode.size();
-  const char * chainPtr = nullptr;
+  char const * leaf     = &rootNode.front();
+  char const * leafEnd  = leaf + rootNode.size();
+  char const * chainPtr = nullptr;
 
   vector< char > extLeaf;
 
@@ -1209,9 +1211,9 @@ void BtreeIndex::findSingleNodeHeadwords( uint32_t offsets, QSet< QString > * he
 
   QMutexLocker _( idxFileMutex );
 
-  const char * leaf     = nullptr;
-  const char * leafEnd  = nullptr;
-  const char * chainPtr = nullptr;
+  char const * leaf     = nullptr;
+  char const * leafEnd  = nullptr;
+  char const * chainPtr = nullptr;
 
   vector< char > extLeaf;
 
@@ -1249,7 +1251,7 @@ QList< uint32_t > BtreeIndex::findNodes()
     rootNodeLoaded = true;
   }
 
-  const char * leaf = &rootNode.front();
+  char const * leaf = &rootNode.front();
   QList< uint32_t > leafOffset;
 
   uint32_t leafEntries;
@@ -1290,9 +1292,9 @@ void BtreeIndex::getHeadwordsFromOffsets( QList< uint32_t > & offsets,
     rootNodeLoaded = true;
   }
 
-  const char * leaf     = &rootNode.front();
-  const char * leafEnd  = leaf + rootNode.size();
-  const char * chainPtr = nullptr;
+  char const * leaf     = &rootNode.front();
+  char const * leafEnd  = leaf + rootNode.size();
+  char const * chainPtr = nullptr;
 
   vector< char > extLeaf;
 

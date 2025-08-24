@@ -1,29 +1,32 @@
 /* This file is (c) 2008-2012 Konstantin Isakov <ikm@goldendict.org>
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
-#include "dict/dictionary.hh"
 #include "edit_groups.hh"
 #include "instances.hh"
-#include <QInputDialog>
+#include "dict/dictionary.hh"
 #include <QMessageBox>
-#include <QToolButton>
+#include <QInputDialog>
 
 using std::vector;
 
 Groups::Groups( QWidget * parent,
-                const vector< sptr< Dictionary::Class > > & dicts_,
-                const Config::Groups & groups_,
-                const Config::Group & order ):
+                vector< sptr< Dictionary::Class > > const & dicts_,
+                Config::Groups const & groups_,
+                Config::Group const & order ):
   QWidget( parent ),
   dicts( dicts_ ),
   groups( groups_ )
 {
   ui.setupUi( this );
 
-  resetData( dicts_, groups_, order );
+  // Populate the dictionaries' list
+
+  ui.dictionaries->setAsSource();
+  ui.dictionaries->populate( Instances::Group( order, dicts, Config::Group() ).dictionaries, dicts );
 
   ui.searchLine->applyTo( ui.dictionaries );
   addAction( ui.searchLine->getFocusAction() );
+
   groupsListMenu = new QMenu( tr( "Group tabs" ), ui.groups );
 
   groupsListButton = new QToolButton( ui.groups );
@@ -37,6 +40,10 @@ Groups::Groups( QWidget * parent,
 
   connect( groupsListMenu, &QMenu::aboutToShow, this, &Groups::fillGroupsMenu );
   connect( groupsListMenu, &QMenu::triggered, this, &Groups::switchToGroup );
+
+  // Populate groups' widget
+
+  ui.groups->populate( groups, dicts, ui.dictionaries->getCurrentDictionaries() );
 
   connect( ui.addGroup, &QAbstractButton::clicked, this, &Groups::addNew );
   connect( ui.renameGroup, &QAbstractButton::clicked, this, &Groups::renameCurrent );
@@ -57,18 +64,6 @@ Groups::Groups( QWidget * parent,
   countChanged();
 }
 
-void Groups::resetData( const vector< sptr< Dictionary::Class > > & dicts_,
-                        const Config::Groups & groups_,
-                        const Config::Group & order )
-{
-  // Populate the dictionaries' list
-  ui.dictionaries->setAsSource();
-  ui.dictionaries->populate( Instances::Group( order, dicts_, Config::Group() ).dictionaries, dicts_ );
-
-  // Populate groups' widget
-  ui.groups->populate( groups_, dicts_, ui.dictionaries->getCurrentDictionaries() );
-}
-
 void Groups::editGroup( unsigned id )
 {
   for ( int x = 0; x < groups.size(); ++x ) {
@@ -80,7 +75,7 @@ void Groups::editGroup( unsigned id )
   }
 }
 
-void Groups::updateDictionaryOrder( const Config::Group & order )
+void Groups::updateDictionaryOrder( Config::Group const & order )
 {
   // Make sure it differs from what we have
   Instances::Group newOrder( order, dicts, Config::Group() );
@@ -218,7 +213,7 @@ void Groups::removeFromGroup()
   }
 }
 
-void Groups::showDictInfo( const QPoint & pos )
+void Groups::showDictInfo( QPoint const & pos )
 {
   QVariant data =
     ui.dictionaries->getModel()->data( ui.searchLine->mapToSource( ui.dictionaries->indexAt( pos ) ), Qt::EditRole );
@@ -228,7 +223,7 @@ void Groups::showDictInfo( const QPoint & pos )
   }
 
   if ( !id.isEmpty() ) {
-    const vector< sptr< Dictionary::Class > > & dicts = ui.dictionaries->getCurrentDictionaries();
+    vector< sptr< Dictionary::Class > > const & dicts = ui.dictionaries->getCurrentDictionaries();
     unsigned n;
     for ( n = 0; n < dicts.size(); n++ ) {
       if ( id.compare( QString::fromUtf8( dicts.at( n )->getId().c_str() ) ) == 0 ) {

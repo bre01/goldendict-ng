@@ -6,6 +6,7 @@
 #include <QProcess>
 #include "dictionary.hh"
 #include "config.hh"
+#include "text.hh"
 
 /// Support for arbitrary programs.
 namespace Programs {
@@ -13,7 +14,7 @@ namespace Programs {
 using std::vector;
 using std::string;
 
-vector< sptr< Dictionary::Class > > makeDictionaries( const Config::Programs & );
+vector< sptr< Dictionary::Class > > makeDictionaries( Config::Programs const & );
 
 class RunInstance: public QObject
 {
@@ -27,7 +28,7 @@ public:
   // Starts the process. Should only be used once. The finished() signal will
   // be emitted once it finishes. If there's an error, returns false and the
   // description is saved to 'error'.
-  bool start( const Config::Program &, const QString & word, QString & error );
+  bool start( Config::Program const &, QString const & word, QString & error );
 
 signals:
   // Connect to this signal to get run results
@@ -49,7 +50,7 @@ class ProgramDataRequest: public Dictionary::DataRequest
 
 public:
 
-  ProgramDataRequest( const QString & word, const Config::Program & );
+  ProgramDataRequest( QString const & word, Config::Program const & );
 
   virtual void cancel();
 
@@ -66,7 +67,7 @@ class ProgramWordSearchRequest: public Dictionary::WordSearchRequest
 
 public:
 
-  ProgramWordSearchRequest( const QString & word, const Config::Program & );
+  ProgramWordSearchRequest( QString const & word, Config::Program const & );
 
   virtual void cancel();
 

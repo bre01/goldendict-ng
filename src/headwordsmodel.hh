@@ -2,6 +2,7 @@
 
 #include "dict/dictionary.hh"
 #include <QAbstractListModel>
+#include <QStringList>
 
 static const int HEADWORDS_MAX_LIMIT = 500000;
 class HeadwordListModel: public QAbstractListModel

@@ -133,7 +133,11 @@ void EditDictionaries::currentChanged( int index )
 
       //When accept the changes ,the second and third tab will be recreated. which means the current Index tab will be changed.
       if ( question.clickedButton() == accept ) {
+        disconnect( ui.tabs, &QTabWidget::currentChanged, this, &EditDictionaries::currentChanged );
+
         acceptChangedSources( true );
+        ui.tabs->setCurrentIndex( index );
+        connect( ui.tabs, &QTabWidget::currentChanged, this, &EditDictionaries::currentChanged );
       }
       else {
         // Prevent tab from switching
@@ -196,8 +200,12 @@ void EditDictionaries::acceptChangedSources( bool rebuildGroups )
 #ifdef TTS_SUPPORT
   cfg.voiceEngines = sources.getVoiceEngines();
 #endif
+  setUpdatesEnabled( false );
   // Those hold pointers to dictionaries, we need to free them.
   groupInstances.clear();
+
+  groups.clear();
+  orderAndProps.clear();
 
   loadDictionaries( this, cfg, dictionaries, dictNetMgr );
 
@@ -206,12 +214,18 @@ void EditDictionaries::acceptChangedSources( bool rebuildGroups )
   Instances::updateNames( savedInactive, dictionaries );
 
   if ( rebuildGroups ) {
-    setUpdatesEnabled( false );
+    ui.tabs->removeTab( 1 );
+    ui.tabs->removeTab( 1 );
 
-    orderAndProps->resetData( savedOrder, savedInactive, dictionaries );
-    groups->resetData( dictionaries, savedGroups, orderAndProps->getCurrentDictionaryOrder() );
-    setUpdatesEnabled( true );
+    orderAndProps = new OrderAndProps( this, savedOrder, savedInactive, dictionaries );
+    groups        = new Groups( this, dictionaries, savedGroups, orderAndProps->getCurrentDictionaryOrder() );
+
+    ui.tabs->insertTab( 1, orderAndProps, QIcon( ":/icons/book.svg" ), tr( "&Dictionaries" ) );
+    ui.tabs->insertTab( 2, groups, QIcon( ":/icons/bookcase.svg" ), tr( "&Groups" ) );
+    connect( groups, &Groups::showDictionaryInfo, this, &EditDictionaries::showDictionaryInfo );
+    connect( orderAndProps, &OrderAndProps::showDictionaryHeadwords, this, &EditDictionaries::showDictionaryHeadwords );
   }
+  setUpdatesEnabled( true );
 }
 EditDictionaries::~EditDictionaries()
 {

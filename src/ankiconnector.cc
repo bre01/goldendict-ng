@@ -1,14 +1,17 @@
 #include "ankiconnector.hh"
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
 #include "utils.hh"
 
-QString markTargetWord( const QString & sentence, const QString & word )
+QString markTargetWord( QString const & sentence, QString const & word )
 {
   // TODO properly handle inflected words.
   QString result = sentence;
   return result.replace( word, "<b>" + word + "</b>", Qt::CaseInsensitive );
 }
 
-AnkiConnector::AnkiConnector( QObject * parent, const Config::Class & _cfg ):
+AnkiConnector::AnkiConnector( QObject * parent, Config::Class const & _cfg ):
   QObject{ parent },
   cfg( _cfg )
 {
@@ -16,7 +19,7 @@ AnkiConnector::AnkiConnector( QObject * parent, const Config::Class & _cfg ):
   connect( mgr, &QNetworkAccessManager::finished, this, &AnkiConnector::finishedSlot );
 }
 
-void AnkiConnector::sendToAnki( const QString & word, QString text, const QString & sentence )
+void AnkiConnector::sendToAnki( QString const & word, QString text, QString const & sentence )
 {
   if ( word.isEmpty() ) {
     emit this->errorText( tr( "Anki: can't create a card without a word" ) );
@@ -26,7 +29,7 @@ void AnkiConnector::sendToAnki( const QString & word, QString text, const QStrin
   // Anki doesn't understand the newline character, so it should be escaped.
   text = text.replace( "\n", "<br>" );
 
-  const QString postTemplate = R"anki({
+  QString const postTemplate = R"anki({
       "action": "addNote",
       "version": 6,
       "params": {
@@ -58,7 +61,7 @@ void AnkiConnector::sendToAnki( const QString & word, QString text, const QStrin
   postToAnki( postData );
 }
 
-void AnkiConnector::ankiSearch( const QString & word )
+void AnkiConnector::ankiSearch( QString const & word )
 {
   if ( !cfg.preferences.ankiConnectServer.enabled ) {
     emit this->errorText( tr( "Anki search: AnkiConnect is not enabled." ) );
@@ -75,7 +78,7 @@ void AnkiConnector::ankiSearch( const QString & word )
   postToAnki( postTemplate.arg( word ) );
 }
 
-void AnkiConnector::postToAnki( const QString & postData )
+void AnkiConnector::postToAnki( QString const & postData )
 {
   QUrl url;
   url.setScheme( "http" );
@@ -95,9 +98,9 @@ void AnkiConnector::postToAnki( const QString & postData )
 void AnkiConnector::finishedSlot( QNetworkReply * reply )
 {
   if ( reply->error() == QNetworkReply::NoError ) {
-    const QByteArray bytes   = reply->readAll();
-    const QJsonDocument json = QJsonDocument::fromJson( bytes );
-    const auto obj           = json.object();
+    QByteArray const bytes   = reply->readAll();
+    QJsonDocument const json = QJsonDocument::fromJson( bytes );
+    auto const obj           = json.object();
 
     // Normally AnkiConnect always returns result and error,
     // unless Anki is not running.

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QAbstractItemDelegate>
 #include <QStyledItemDelegate>
 
 class WordListItemDelegate: public QStyledItemDelegate

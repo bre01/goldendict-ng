@@ -15,7 +15,7 @@ public:
 
 public slots:
 
-  void indexing( const QString & dictionaryName );
+  void indexing( QString const & dictionaryName );
   void loading( const QString & dictionaryName );
 
 private:

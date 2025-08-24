@@ -2,6 +2,7 @@
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
 #include "website.hh"
+#include "text.hh"
 #include <QUrl>
 #include <QTextCodec>
 #include <QDir>
@@ -26,10 +27,10 @@ class WebSiteDictionary: public Dictionary::Class
 
 public:
 
-  WebSiteDictionary( const string & id,
-                     const string & name_,
-                     const QString & urlTemplate_,
-                     const QString & iconFilename_,
+  WebSiteDictionary( string const & id,
+                     string const & name_,
+                     QString const & urlTemplate_,
+                     QString const & iconFilename_,
                      bool inside_iframe_,
                      QNetworkAccessManager & netMgr_ ):
     Dictionary::Class( id, vector< string >() ),
@@ -53,14 +54,16 @@ public:
     return 0;
   }
 
-  sptr< WordSearchRequest > prefixMatch( const std::u32string & word, unsigned long ) override;
+  sptr< WordSearchRequest > prefixMatch( std::u32string const & word, unsigned long ) override;
 
-  sptr< DataRequest > getArticle( const std::u32string &,
-                                  const vector< std::u32string > & alts,
-                                  const std::u32string & context,
+  sptr< DataRequest > getArticle( std::u32string const &,
+                                  vector< std::u32string > const & alts,
+                                  std::u32string const & context,
                                   bool ) override;
 
-  sptr< DataRequest > getResource( const string & name ) override;
+  sptr< Dictionary::DataRequest > getResource( string const & name ) override;
+
+  void isolateWebCSS( QString & css );
 
   Features getFeatures() const noexcept override
   {
@@ -81,7 +84,7 @@ protected slots:
   virtual void requestFinished( QNetworkReply * ) {}
 };
 
-sptr< WordSearchRequest > WebSiteDictionary::prefixMatch( const std::u32string & /*word*/, unsigned long )
+sptr< WordSearchRequest > WebSiteDictionary::prefixMatch( std::u32string const & /*word*/, unsigned long )
 {
   sptr< WordSearchRequestInstant > sr = std::make_shared< WordSearchRequestInstant >();
 
@@ -90,6 +93,10 @@ sptr< WordSearchRequest > WebSiteDictionary::prefixMatch( const std::u32string &
   return sr;
 }
 
+void WebSiteDictionary::isolateWebCSS( QString & css )
+{
+  isolateCSS( css, ".website" );
+}
 
 class WebSiteArticleRequest: public WebSiteDataRequestSlots
 {
@@ -100,7 +107,7 @@ class WebSiteArticleRequest: public WebSiteDataRequestSlots
 
 public:
 
-  WebSiteArticleRequest( const QString & url, QNetworkAccessManager & _mgr, Class * dictPtr_ );
+  WebSiteArticleRequest( QString const & url, QNetworkAccessManager & _mgr, Class * dictPtr_ );
   ~WebSiteArticleRequest() {}
 
   void cancel() override;
@@ -115,7 +122,7 @@ void WebSiteArticleRequest::cancel()
   finish();
 }
 
-WebSiteArticleRequest::WebSiteArticleRequest( const QString & url_, QNetworkAccessManager & _mgr, Class * dictPtr_ ):
+WebSiteArticleRequest::WebSiteArticleRequest( QString const & url_, QNetworkAccessManager & _mgr, Class * dictPtr_ ):
   url( url_ ),
   dictPtr( dictPtr_ ),
   mgr( _mgr )
@@ -289,9 +296,9 @@ void WebSiteArticleRequest::requestFinished( QNetworkReply * r )
   finish();
 }
 
-sptr< DataRequest > WebSiteDictionary::getArticle( const std::u32string & str,
-                                                   const vector< std::u32string > & /*alts*/,
-                                                   const std::u32string & context,
+sptr< DataRequest > WebSiteDictionary::getArticle( std::u32string const & str,
+                                                   vector< std::u32string > const & /*alts*/,
+                                                   std::u32string const & context,
                                                    bool /*ignoreDiacritics*/ )
 {
   QString urlString = Utils::WebSite::urlReplaceWord( QString( urlTemplate ), QString::fromStdU32String( str ) );
@@ -303,7 +310,7 @@ sptr< DataRequest > WebSiteDictionary::getArticle( const std::u32string & str,
 
     //heuristic add url to global whitelist.
     QUrl url( urlString );
-    GlobalBroadcaster::instance()->addWhitelist( Utils::Url::getHostBase( url.host() ) );
+    GlobalBroadcaster::instance()->addWhitelist( url.host() );
 
     QString encodeUrl = urlString;
 
@@ -326,10 +333,107 @@ sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>)",
   return std::make_shared< WebSiteArticleRequest >( urlString, netMgr, this );
 }
 
-
-sptr< DataRequest > WebSiteDictionary::getResource( const string & /*name*/ )
+class WebSiteResourceRequest: public WebSiteDataRequestSlots
 {
-  return std::make_shared< DataRequestInstant >( false );
+  QNetworkReply * netReply;
+  QString url;
+  WebSiteDictionary * dictPtr;
+  QNetworkAccessManager & mgr;
+
+public:
+
+  WebSiteResourceRequest( QString const & url_, QNetworkAccessManager & _mgr, WebSiteDictionary * dictPtr_ );
+  ~WebSiteResourceRequest() {}
+
+  void cancel() override;
+
+private:
+
+  void requestFinished( QNetworkReply * ) override;
+};
+
+WebSiteResourceRequest::WebSiteResourceRequest( QString const & url_,
+                                                QNetworkAccessManager & _mgr,
+                                                WebSiteDictionary * dictPtr_ ):
+  url( url_ ),
+  dictPtr( dictPtr_ ),
+  mgr( _mgr )
+{
+  connect( &mgr,
+           SIGNAL( finished( QNetworkReply * ) ),
+           this,
+           SLOT( requestFinished( QNetworkReply * ) ),
+           Qt::QueuedConnection );
+
+  QUrl reqUrl( url );
+
+  netReply = mgr.get( QNetworkRequest( reqUrl ) );
+
+#ifndef QT_NO_SSL
+  connect( netReply, SIGNAL( sslErrors( QList< QSslError > ) ), netReply, SLOT( ignoreSslErrors() ) );
+#endif
+}
+
+void WebSiteResourceRequest::cancel()
+{
+  finish();
+}
+
+void WebSiteResourceRequest::requestFinished( QNetworkReply * r )
+{
+  if ( isFinished() ) { // Was cancelled
+    return;
+  }
+
+  if ( r != netReply ) {
+    // Well, that's not our reply, don't do anything
+    return;
+  }
+
+  if ( netReply->error() == QNetworkReply::NoError ) {
+    // Check for redirect reply
+
+    QVariant possibleRedirectUrl = netReply->attribute( QNetworkRequest::RedirectionTargetAttribute );
+    QUrl redirectUrl             = possibleRedirectUrl.toUrl();
+    if ( !redirectUrl.isEmpty() ) {
+      disconnect( netReply, 0, 0, 0 );
+      netReply->deleteLater();
+      netReply = mgr.get( QNetworkRequest( redirectUrl ) );
+#ifndef QT_NO_SSL
+      connect( netReply, SIGNAL( sslErrors( QList< QSslError > ) ), netReply, SLOT( ignoreSslErrors() ) );
+#endif
+      return;
+    }
+
+    // Handle reply data
+
+    QByteArray replyData = netReply->readAll();
+    QString cssString    = QString::fromUtf8( replyData );
+
+    dictPtr->isolateWebCSS( cssString );
+
+    appendString( cssString.toStdString() );
+
+    hasAnyData = true;
+  }
+  else {
+    setErrorString( netReply->errorString() );
+  }
+
+  disconnect( netReply, 0, 0, 0 );
+  netReply->deleteLater();
+
+  finish();
+}
+
+sptr< Dictionary::DataRequest > WebSiteDictionary::getResource( string const & name )
+{
+  QString link = QString::fromUtf8( name.c_str() );
+  int pos      = link.indexOf( '/' );
+  if ( pos > 0 ) {
+    link.replace( pos, 1, "://" );
+  }
+  return std::make_shared< WebSiteResourceRequest >( link, netMgr, this );
 }
 
 void WebSiteDictionary::loadIcon() noexcept
@@ -353,7 +457,7 @@ void WebSiteDictionary::loadIcon() noexcept
 
 } // namespace
 
-vector< sptr< Dictionary::Class > > makeDictionaries( const Config::WebSites & ws, QNetworkAccessManager & mgr )
+vector< sptr< Dictionary::Class > > makeDictionaries( Config::WebSites const & ws, QNetworkAccessManager & mgr )
 
 {
   vector< sptr< Dictionary::Class > > result;

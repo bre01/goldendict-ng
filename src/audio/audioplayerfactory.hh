@@ -22,7 +22,7 @@ public:
   /// The returned reference to a smart pointer is valid as long as this object
   /// exists. The pointer to the owned AudioPlayerInterface may change after the
   /// call to setPreferences(), but it is guaranteed to never be null.
-  const AudioPlayerPtr & player() const
+  AudioPlayerPtr const & player() const
   {
     return playerPtr;
   }

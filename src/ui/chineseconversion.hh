@@ -15,7 +15,7 @@ class ChineseConversion: public QGroupBox
   Q_OBJECT
 
 public:
-  ChineseConversion( QWidget * parent, const Config::Chinese & );
+  ChineseConversion( QWidget * parent, Config::Chinese const & );
   ~ChineseConversion();
 
   void getConfig( Config::Chinese & ) const;

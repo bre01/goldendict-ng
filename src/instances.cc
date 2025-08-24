@@ -11,9 +11,9 @@ namespace Instances {
 using std::set;
 using std::string;
 
-Group::Group( const Config::Group & cfgGroup,
-              const std::vector< sptr< Dictionary::Class > > & allDictionaries,
-              const Config::Group & inactiveGroup ):
+Group::Group( Config::Group const & cfgGroup,
+              std::vector< sptr< Dictionary::Class > > const & allDictionaries,
+              Config::Group const & inactiveGroup ):
   id( cfgGroup.id ),
   name( cfgGroup.name ),
   icon( cfgGroup.icon ),
@@ -28,8 +28,8 @@ Group::Group( const Config::Group & cfgGroup,
   QList< string > dictOrderList;
   auto dictMap = Dictionary::dictToMap( allDictionaries );
 
-  for ( const auto & dict : cfgGroup.dictionaries ) {
-    const std::string dictId = dict.id.toStdString();
+  for ( auto const & dict : cfgGroup.dictionaries ) {
+    std::string const dictId = dict.id.toStdString();
 
     //avoid duplicate dictionary in groups in config file.
     if ( dictMap.contains( dictId ) && !dictOrderList.contains( dictId ) ) {
@@ -40,8 +40,8 @@ Group::Group( const Config::Group & cfgGroup,
 
   // Remove inactive dictionaries
   if ( !inactiveGroup.dictionaries.isEmpty() ) {
-    for ( const auto & dict : inactiveGroup.dictionaries ) {
-      const string dictId = dict.id.toStdString();
+    for ( auto const & dict : inactiveGroup.dictionaries ) {
+      string const dictId = dict.id.toStdString();
       groupDicts.remove( dictId );
       dictOrderList.removeOne( dictId );
     }
@@ -80,7 +80,7 @@ Config::Group Group::makeConfigGroup()
     stream << iconData;
   }
 
-  for ( const auto & dict : dictionaries ) {
+  for ( auto const & dict : dictionaries ) {
     result.dictionaries.push_back(
       Config::DictionaryRef( dict->getId().c_str(), QString::fromUtf8( dict->getName().c_str() ) ) );
   }
@@ -103,7 +103,7 @@ void Group::checkMutedDictionaries( Config::MutedDictionaries * mutedDictionarie
 {
   Config::MutedDictionaries temp;
 
-  for ( const auto & dict : dictionaries ) {
+  for ( auto const & dict : dictionaries ) {
     auto dictId = QString::fromStdString( dict->getId() );
     if ( mutedDictionaries->contains( dictId ) ) {
       temp.insert( dictId );
@@ -112,7 +112,18 @@ void Group::checkMutedDictionaries( Config::MutedDictionaries * mutedDictionarie
   *mutedDictionaries = temp;
 }
 
-const Group * Groups::findGroup( unsigned id ) const
+Group * Groups::findGroup( unsigned id )
+{
+  for ( unsigned x = 0; x < size(); ++x ) {
+    if ( operator[]( x ).id == id ) {
+      return &( operator[]( x ) );
+    }
+  }
+
+  return nullptr;
+}
+
+Group const * Groups::findGroup( unsigned id ) const
 {
   for ( unsigned x = 0; x < size(); ++x ) {
     if ( operator[]( x ).id == id ) {
@@ -124,8 +135,8 @@ const Group * Groups::findGroup( unsigned id ) const
 }
 
 void complementDictionaryOrder( Group & group,
-                                const Group & inactiveDictionaries,
-                                const vector< sptr< Dictionary::Class > > & dicts )
+                                Group const & inactiveDictionaries,
+                                vector< sptr< Dictionary::Class > > const & dicts )
 {
   set< string, std::less<> > presentIds;
 
@@ -144,11 +155,11 @@ void complementDictionaryOrder( Group & group,
   }
 }
 
-void updateNames( Config::Group & group, const vector< sptr< Dictionary::Class > > & allDictionaries )
+void updateNames( Config::Group & group, vector< sptr< Dictionary::Class > > const & allDictionaries )
 {
 
   for ( unsigned x = group.dictionaries.size(); x--; ) {
-    const std::string id = group.dictionaries[ x ].id.toStdString();
+    std::string const id = group.dictionaries[ x ].id.toStdString();
 
     for ( unsigned y = allDictionaries.size(); y--; ) {
       if ( allDictionaries[ y ]->getId() == id ) {
@@ -159,21 +170,21 @@ void updateNames( Config::Group & group, const vector< sptr< Dictionary::Class >
   }
 }
 
-void updateNames( Config::Groups & groups, const vector< sptr< Dictionary::Class > > & allDictionaries )
+void updateNames( Config::Groups & groups, vector< sptr< Dictionary::Class > > const & allDictionaries )
 {
   for ( auto & group : groups ) {
     updateNames( group, allDictionaries );
   }
 }
 
-void updateNames( Config::Class & cfg, const vector< sptr< Dictionary::Class > > & allDictionaries )
+void updateNames( Config::Class & cfg, vector< sptr< Dictionary::Class > > const & allDictionaries )
 {
   updateNames( cfg.dictionaryOrder, allDictionaries );
   updateNames( cfg.inactiveDictionaries, allDictionaries );
   updateNames( cfg.groups, allDictionaries );
 }
 
-QIcon iconFromData( const QByteArray & iconData )
+QIcon iconFromData( QByteArray const & iconData )
 {
   QDataStream stream( iconData );
 

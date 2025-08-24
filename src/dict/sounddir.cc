@@ -3,6 +3,7 @@
 
 #include "sounddir.hh"
 #include "folding.hh"
+#include "text.hh"
 #include "btreeidx.hh"
 #include "chunkedstorage.hh"
 #include "filetype.hh"
@@ -12,6 +13,7 @@
 #include "utils.hh"
 
 #include <set>
+#include <QDir>
 #include <QFileInfo>
 #include <QDirIterator>
 
@@ -65,11 +67,11 @@ class SoundDirDictionary: public BtreeIndexing::BtreeDictionary
 
 public:
 
-  SoundDirDictionary( const string & id,
-                      const string & name,
-                      const string & indexFile,
-                      const vector< string > & dictionaryFiles,
-                      const QString & iconFilename_ );
+  SoundDirDictionary( string const & id,
+                      string const & name,
+                      string const & indexFile,
+                      vector< string > const & dictionaryFiles,
+                      QString const & iconFilename_ );
 
   unsigned long getArticleCount() noexcept override
   {
@@ -81,12 +83,12 @@ public:
     return getArticleCount();
   }
 
-  sptr< Dictionary::DataRequest > getArticle( const std::u32string &,
-                                              const vector< std::u32string > & alts,
-                                              const std::u32string &,
+  sptr< Dictionary::DataRequest > getArticle( std::u32string const &,
+                                              vector< std::u32string > const & alts,
+                                              std::u32string const &,
                                               bool ignoreDiacritics ) override;
 
-  sptr< Dictionary::DataRequest > getResource( const string & name ) override;
+  sptr< Dictionary::DataRequest > getResource( string const & name ) override;
 
 protected:
 
@@ -94,11 +96,11 @@ protected:
   bool get_file_name( uint32_t articleOffset, QString & file_name );
 };
 
-SoundDirDictionary::SoundDirDictionary( const string & id,
-                                        const string & name_,
-                                        const string & indexFile,
-                                        const vector< string > & dictionaryFiles,
-                                        const QString & iconFilename_ ):
+SoundDirDictionary::SoundDirDictionary( string const & id,
+                                        string const & name_,
+                                        string const & indexFile,
+                                        vector< string > const & dictionaryFiles,
+                                        QString const & iconFilename_ ):
   BtreeDictionary( id, dictionaryFiles ),
   idx( indexFile, QIODevice::ReadOnly ),
   idxHeader( idx.read< IdxHeader >() ),
@@ -112,9 +114,9 @@ SoundDirDictionary::SoundDirDictionary( const string & id,
   openIndex( IndexInfo( idxHeader.indexBtreeMaxElements, idxHeader.indexRootOffset ), idx, idxMutex );
 }
 
-sptr< Dictionary::DataRequest > SoundDirDictionary::getArticle( const std::u32string & word,
-                                                                const vector< std::u32string > & alts,
-                                                                const std::u32string &,
+sptr< Dictionary::DataRequest > SoundDirDictionary::getArticle( std::u32string const & word,
+                                                                vector< std::u32string > const & alts,
+                                                                std::u32string const &,
                                                                 bool ignoreDiacritics )
 {
   vector< WordArticleLink > chain = findArticles( word, ignoreDiacritics );
@@ -324,7 +326,7 @@ bool SoundDirDictionary::get_file_name( uint32_t articleOffset, QString & file_n
   return true;
 }
 
-sptr< Dictionary::DataRequest > SoundDirDictionary::getResource( const string & name )
+sptr< Dictionary::DataRequest > SoundDirDictionary::getResource( string const & name )
 
 {
   bool isNumber = false;
@@ -378,8 +380,8 @@ sptr< Dictionary::DataRequest > SoundDirDictionary::getResource( const string & 
   }
 }
 
-void addDir( const QDir & baseDir,
-             const QDir & dir,
+void addDir( QDir const & baseDir,
+             QDir const & dir,
              IndexedWords & indexedWords,
              uint32_t & soundsCount,
              ChunkedStorage::Writer & chunks )
@@ -414,8 +416,8 @@ void addDir( const QDir & baseDir,
 
 } // namespace
 
-vector< sptr< Dictionary::Class > > makeDictionaries( const Config::SoundDirs & soundDirs,
-                                                      const string & indicesDir,
+vector< sptr< Dictionary::Class > > makeDictionaries( Config::SoundDirs const & soundDirs,
+                                                      string const & indicesDir,
                                                       Dictionary::Initializing & initializing )
 
 {

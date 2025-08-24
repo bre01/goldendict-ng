@@ -2,6 +2,8 @@
 
 #include <QFile>
 #include <QList>
+#include <QString>
+
 #include <vector>
 #include <string>
 

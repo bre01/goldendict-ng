@@ -22,10 +22,10 @@ struct DataFiles
   QString dictId;                   // Dictionary id, e.g. "en_US"
   QString dictName;                 // Localized dictionary name to be displayed, e.g. "English(US) Morphology"
 
-  DataFiles( const QString & affFileName_,
-             const QString & dicFileName_,
-             const QString & dictId_,
-             const QString & dictName_ ):
+  DataFiles( QString const & affFileName_,
+             QString const & dicFileName_,
+             QString const & dictId_,
+             QString const & dictName_ ):
     affFileName( affFileName_ ),
     dicFileName( dicFileName_ ),
     dictId( dictId_ ),
@@ -35,8 +35,8 @@ struct DataFiles
 };
 
 /// Finds all the DataFiles it can at the given path (with Qt separators).
-vector< DataFiles > findDataFiles( const QString & path );
+vector< DataFiles > findDataFiles( QString const & path );
 
-vector< sptr< Dictionary::Class > > makeDictionaries( const Config::Hunspell & );
+vector< sptr< Dictionary::Class > > makeDictionaries( Config::Hunspell const & );
 
 } // namespace HunspellMorpho

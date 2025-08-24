@@ -2,6 +2,7 @@
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
 #include <QScopedPointer>
+#include <QObject>
 #include <utility>
 #include "audioplayerfactory.hh"
 #include "externalaudioplayer.hh"

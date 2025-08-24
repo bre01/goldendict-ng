@@ -1,6 +1,8 @@
 #pragma once
 #include "audioplayerinterface.hh"
 #include "ffmpegaudioplayer.hh"
+#include "multimediaaudioplayer.hh"
+#include <QScopedPointer>
 #include <QStringList>
 
 /// Overly engineered dummy/helper/wrapper "backend", which is not, to manage backends.
@@ -14,22 +16,22 @@ public:
   /// The first one willl be the default one
   static QStringList availableBackends();
 
-  const QString & getName() const
+  QString const & getName() const
   {
     return name;
   }
 
-  void setName( const QString & name_ )
+  void setName( QString const & name_ )
   {
     name = name_;
   }
 
-  bool operator==( const InternalPlayerBackend & other ) const
+  bool operator==( InternalPlayerBackend const & other ) const
   {
     return name == other.name;
   }
 
-  bool operator!=( const InternalPlayerBackend & other ) const
+  bool operator!=( InternalPlayerBackend const & other ) const
   {
     return !operator==( other );
   }

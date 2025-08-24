@@ -5,12 +5,14 @@
 
 #include "ex.hh"
 
+#include <QFile>
 #include <QFileInfo>
 #include <cstdio>
 #include <string>
 #include <vector>
 #include <QMutex>
 #include <type_traits>
+#include <string>
 
 /// File utilities
 namespace File {
@@ -22,11 +24,11 @@ DEF_EX( exWriteError, "Error writing to the file", Ex )
 DEF_EX( exSeekError, "File seek error", Ex )
 DEF_EX( exAllocation, "Memory allocation error", Ex )
 
-bool tryPossibleName( const std::string & name, std::string & copyTo );
+bool tryPossibleName( std::string const & name, std::string & copyTo );
 
-bool tryPossibleZipName( const std::string & name, std::string & copyTo );
+bool tryPossibleZipName( std::string const & name, std::string & copyTo );
 
-void loadFromFile( const std::string & filename, std::vector< char > & data );
+void loadFromFile( std::string const & filename, std::vector< char > & data );
 
 
 /// Exclusivly used for processing GD's index files
@@ -42,7 +44,7 @@ public:
 
   /// QFile::read  & QFile::write , but with exception throwing
   void read( void * buf, qint64 size );
-  void write( const void * buf, qint64 size );
+  void write( void const * buf, qint64 size );
 
   // Read sizeof(T) bytes and convert the read data to T
   template< typename T >
@@ -54,7 +56,7 @@ public:
   }
 
   template< typename T >
-  void write( const T & value )
+  void write( T const & value )
   {
     write( &value, sizeof( value ) );
   }
@@ -67,7 +69,7 @@ public:
   /// the number of records it managed to write, up to 'count'.
   /// This function does not employ buffering, but flushes the buffer if it
   /// was used before.
-  size_t writeRecords( const void * buf, qint64 size, qint64 count );
+  size_t writeRecords( void const * buf, qint64 size, qint64 count );
 
   /// Read a line with option to strip the trailing newline character
   /// Returns either s or 0 if no characters were read.
