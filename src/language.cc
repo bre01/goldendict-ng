@@ -19,80 +19,83 @@ struct LangData
 
 struct Db
 {
-  static Db const & instance();
+  static const Db & instance();
 
-  [[nodiscard]] QMap< QString, LangData > const & getIso2ToLangData() const
+  [[nodiscard]] const QMap< QString, LangData > & getIso2ToLangData() const
   {
     return iso2LangData;
   }
 
-  [[nodiscard]] QMap< QString, QString > const & locale2LanguageMap() const
+  [[nodiscard]] const QMap< QString, QString > & translationLangMap() const
   {
-    return localeLanguage;
+    return translationLangs;
   }
 
 private:
 
   QMap< QString, LangData > iso2LangData;
 
-  QMap< QString, QString > localeLanguage = { { "fr_FR", QT_TR_NOOP( "French" ) },
-                                              { "es_ES", QT_TR_NOOP( "Spanish" ) },
-                                              { "be_BY", QT_TR_NOOP( "Belarusian" ) },
-                                              { "bg_BG", QT_TR_NOOP( "Bulgarian" ) },
-                                              { "cs_CZ", QT_TR_NOOP( "Czech" ) },
-                                              { "de_DE", QT_TR_NOOP( "German" ) },
-                                              { "el_GR", QT_TR_NOOP( "Greek" ) },
-                                              { "fi_FI", QT_TR_NOOP( "Finnish" ) },
-                                              { "it_IT", QT_TR_NOOP( "Italian" ) },
-                                              { "ja_JP", QT_TR_NOOP( "Japanese" ) },
-                                              { "ko_KR", QT_TR_NOOP( "Korean" ) },
-                                              { "lt_LT", QT_TR_NOOP( "Lithuanian" ) },
-                                              { "mk_MK", QT_TR_NOOP( "Macedonian" ) },
-                                              { "nl_NL", QT_TR_NOOP( "Dutch" ) },
-                                              { "pl_PL", QT_TR_NOOP( "Polish" ) },
-                                              { "pt_PT", QT_TR_NOOP( "Portuguese" ) },
-                                              { "ru_RU", QT_TR_NOOP( "Russian" ) },
-                                              { "sk_SK", QT_TR_NOOP( "Slovak" ) },
-                                              { "sq_AL", QT_TR_NOOP( "Albanian" ) },
-                                              { "sr_SP", QT_TR_NOOP( "Serbian (Cyrillic)" ) },
-                                              { "sv_SE", QT_TR_NOOP( "Swedish" ) },
-                                              { "tr_TR", QT_TR_NOOP( "Turkish" ) },
-                                              { "uk_UA", QT_TR_NOOP( "Ukrainian" ) },
-                                              { "zh_CN", QT_TR_NOOP( "Chinese Simplified" ) },
-                                              { "zh_TW", QT_TR_NOOP( "Chinese Traditional" ) },
-                                              { "vi_VN", QT_TR_NOOP( "Vietnamese" ) },
-                                              { "pt_BR", QT_TR_NOOP( "Portuguese, Brazilian" ) },
-                                              { "fa_IR", QT_TR_NOOP( "Persian" ) },
-                                              { "es_AR", QT_TR_NOOP( "Spanish, Argentina" ) },
-                                              { "hi_IN", QT_TR_NOOP( "Hindi" ) },
-                                              { "eo_UY", QT_TR_NOOP( "Esperanto" ) },
-                                              { "de_CH", QT_TR_NOOP( "German, Switzerland" ) },
-                                              { "es_BO", QT_TR_NOOP( "Spanish, Bolivia" ) },
-                                              { "tg_TJ", QT_TR_NOOP( "Tajik" ) },
-                                              { "qu_PE", QT_TR_NOOP( "Quechua" ) },
-                                              { "ay_BO", QT_TR_NOOP( "Aymara" ) },
-                                              { "ar_SA", QT_TR_NOOP( "Arabic, Saudi Arabia" ) },
-                                              { "tk_TM", QT_TR_NOOP( "Turkmen" ) },
-                                              { "ie_001", QT_TR_NOOP( "Interlingue" ) },
-                                              { "jbo_EN", QT_TR_NOOP( "Lojban" ) },
-                                              { "hu_HU", QT_TR_NOOP( "Hungarian" ) },
-                                              { "en_US", QT_TR_NOOP( "English" ) } };
+  QMap< QString, QString > translationLangs = {
+    { QT_TR_NOOP( "Albanian" ), "sq" },
+    { QT_TR_NOOP( "Arabic" ), "ar" },
+    { QT_TR_NOOP( "Aymara" ), "ay" },
+    { QT_TR_NOOP( "Belarusian" ), "be" },
+    { QT_TR_NOOP( "Bulgarian" ), "bg" },
+    { QT_TR_NOOP( "Chinese Simplified" ), "zh_CN" },
+    { QT_TR_NOOP( "Chinese Traditional" ), "zh_TW" },
+    { QT_TR_NOOP( "Czech" ), "cs" },
+    { QT_TR_NOOP( "Dutch" ), "nl" },
+    { QT_TR_NOOP( "English" ), "en" },
+    { QT_TR_NOOP( "Esperanto" ), "eo" },
+    { QT_TR_NOOP( "Finnish" ), "fi" },
+    { QT_TR_NOOP( "French" ), "fr" },
+    { QT_TR_NOOP( "German" ), "de" },
+    { QT_TR_NOOP( "German, Switzerland" ), "de_CH" },
+    { QT_TR_NOOP( "Greek" ), "el" },
+    { QT_TR_NOOP( "Hindi" ), "hi" },
+    { QT_TR_NOOP( "Hungarian" ), "hu" },
+    { QT_TR_NOOP( "Interlingue" ), "ie_001" },
+    { QT_TR_NOOP( "Italian" ), "it" },
+    { QT_TR_NOOP( "Japanese" ), "ja" },
+    { QT_TR_NOOP( "Kabyle" ), "kab" },
+    { QT_TR_NOOP( "Korean" ), "ko" },
+    { QT_TR_NOOP( "Lithuanian" ), "lt" },
+    { QT_TR_NOOP( "Lojban" ), "jbo" },
+    { QT_TR_NOOP( "Macedonian" ), "mk" },
+    { QT_TR_NOOP( "Persian" ), "fa" },
+    { QT_TR_NOOP( "Polish" ), "pl" },
+    { QT_TR_NOOP( "Portuguese" ), "pt" },
+    { QT_TR_NOOP( "Portuguese, Brazilian" ), "pt_BR" },
+    { QT_TR_NOOP( "Quechua" ), "qu" },
+    { QT_TR_NOOP( "Russian" ), "ru" },
+    { QT_TR_NOOP( "Serbian" ), "sr" },
+    { QT_TR_NOOP( "Slovak" ), "sk" },
+    { QT_TR_NOOP( "Spanish" ), "es" },
+    { QT_TR_NOOP( "Spanish, Argentina" ), "es_AR" },
+    { QT_TR_NOOP( "Spanish, Bolivia" ), "es_BO" },
+    { QT_TR_NOOP( "Swedish" ), "sv" },
+    { QT_TR_NOOP( "Tajik" ), "tg" },
+    { QT_TR_NOOP( "Turkish" ), "tr" },
+    { QT_TR_NOOP( "Turkmen" ), "tk" },
+    { QT_TR_NOOP( "Ukrainian" ), "uk" },
+    { QT_TR_NOOP( "Vietnamese" ), "vi" },
+  };
 
   Db();
 
-  void addEntry( QString const & iso2, QString const & english, QString const & localized );
+  void addEntry( const QString & iso2, const QString & english, const QString & localized );
 
-  void addExtraCountry( QString const & iso2, QString const & country );
+  void addExtraCountry( const QString & iso2, const QString & country );
 };
 
-Db const & Db::instance()
+const Db & Db::instance()
 {
   static Db v;
 
   return v;
 }
 
-void Db::addEntry( QString const & iso2, QString const & english, QString const & localized )
+void Db::addEntry( const QString & iso2, const QString & english, const QString & localized )
 {
   LangData lang_data;
   lang_data.english   = english;
@@ -100,7 +103,7 @@ void Db::addEntry( QString const & iso2, QString const & english, QString const 
   iso2LangData.insert( iso2, lang_data );
 }
 
-void Db::addExtraCountry( QString const & iso2, QString const & country )
+void Db::addExtraCountry( const QString & iso2, const QString & country )
 {
   if ( !iso2LangData.contains( iso2 ) ) {
     return;
@@ -465,7 +468,7 @@ BabylonLang getBabylonLangByIndex( int index )
   return BabylonDb[ index ];
 }
 
-quint32 findBlgLangIDByEnglishName( std::u32string const & lang )
+quint32 findBlgLangIDByEnglishName( const std::u32string & lang )
 {
   QString enName = QString::fromStdU32String( lang );
   for ( const auto & idx : BabylonDb ) {
@@ -537,14 +540,13 @@ QString localizedStringForId( Id langId )
   return QString( "<img src=\":/flags/%1.png\"> %2" ).arg( iconId, name );
 }
 
-QString languageForLocale( const QString & locale )
+QString translationNameFromLangCode( const QString & locale )
 {
-  return QCoreApplication::translate( "Language::Db",
-                                      Db::instance().locale2LanguageMap()[ locale ].toStdString().c_str() );
+  return QCoreApplication::translate( "Language::Db", locale.toStdString().c_str() );
 }
 
-QMap< QString, QString > languageMap()
+QMap< QString, QString > translationLangMap()
 {
-  return Db::instance().locale2LanguageMap();
+  return Db::instance().translationLangMap();
 }
 } // namespace Language

@@ -20,7 +20,7 @@
     <name>AnkiConnector</name>
     <message>
       <source>Anki: can&apos;t create a card without a word</source>
-      <translation type="unfinished">Anki: can&apos;t create a card without a word</translation>
+      <translation>Anki: can&apos;t create a card without a word</translation>
     </message>
     <message>
       <source>Anki search: AnkiConnect is not enabled.</source>
@@ -28,11 +28,11 @@
     </message>
     <message>
       <source>Anki: post to Anki failed</source>
-      <translation type="unfinished">Anki: post to Anki failed</translation>
+      <translation>Anki: post to Anki failed</translation>
     </message>
     <message>
       <source>Anki: post to Anki success</source>
-      <translation type="unfinished">Anki: post to Anki success</translation>
+      <translation>Anki: post to Anki success</translation>
     </message>
   </context>
   <context>
@@ -311,15 +311,15 @@ between classic and school orthography in cyrillic)</source>
     </message>
     <message>
       <source>Taiwan variant</source>
-      <translation type="unfinished">Taiwan variant</translation>
+      <translation>Taiwan variant</translation>
     </message>
     <message>
       <source>Hong Kong variant</source>
-      <translation type="unfinished">Hong Kong variant</translation>
+      <translation>Hong Kong variant</translation>
     </message>
     <message>
       <source>Mainland variant</source>
-      <translation type="unfinished">Mainland variant</translation>
+      <translation>Mainland variant</translation>
     </message>
   </context>
   <context>
@@ -539,7 +539,7 @@ between classic and school orthography in cyrillic)</source>
     </message>
     <message>
       <source>Regular Expression</source>
-      <translation type="unfinished">Regular Expression</translation>
+      <translation>Regular Expression</translation>
     </message>
   </context>
   <context>
@@ -690,7 +690,7 @@ between classic and school orthography in cyrillic)</source>
     </message>
     <message>
       <source>Restore selection</source>
-      <translation type="unfinished">Restore selection</translation>
+      <translation>Restore selection</translation>
     </message>
   </context>
   <context>
@@ -2007,10 +2007,6 @@ Reordene los grupos usando el mouse sobre las pestañas con los nombres de los m
       <translation>albanés</translation>
     </message>
     <message>
-      <source>Serbian (Cyrillic)</source>
-      <translation>Serbio (cirílico)</translation>
-    </message>
-    <message>
       <source>Swedish</source>
       <translation>sueco</translation>
     </message>
@@ -2075,10 +2071,6 @@ Reordene los grupos usando el mouse sobre las pestañas con los nombres de los m
       <translation>Aymara</translation>
     </message>
     <message>
-      <source>Arabic, Saudi Arabia</source>
-      <translation>Árabe, Arabia Saudita</translation>
-    </message>
-    <message>
       <source>Turkmen</source>
       <translation>turcomano</translation>
     </message>
@@ -2097,6 +2089,18 @@ Reordene los grupos usando el mouse sobre las pestañas con los nombres de los m
     <message>
       <source>English</source>
       <translation>Inglés</translation>
+    </message>
+    <message>
+      <source>Arabic</source>
+      <translation>Árabe</translation>
+    </message>
+    <message>
+      <source>Serbian</source>
+      <translation>Serbio</translation>
+    </message>
+    <message>
+      <source>Kabyle</source>
+      <translation type="unfinished">Kabyle</translation>
     </message>
   </context>
   <context>
@@ -2591,11 +2595,11 @@ Para encontrar &apos;*&apos;, &apos;?&apos;, &apos;[&apos;, &apos;]&apos; uso de
     </message>
     <message>
       <source>Save PDF complete</source>
-      <translation type="unfinished">Save PDF complete</translation>
+      <translation>Save PDF complete</translation>
     </message>
     <message>
       <source>Save PDF failed</source>
-      <translation type="unfinished">Save PDF failed</translation>
+      <translation>Save PDF failed</translation>
     </message>
   </context>
   <context>
@@ -2876,10 +2880,6 @@ the application.</source>
     <message>
       <source>Appearance</source>
       <translation>Apariencia</translation>
-    </message>
-    <message>
-      <source>Interface Font</source>
-      <translation>Fuente de interfaz</translation>
     </message>
     <message>
       <source>Turn the UI to dark.</source>
@@ -3439,10 +3439,6 @@ de los diccionarios Stardict, Babylon y GLS.</translation>
       <translation>Save debug messages to gd_log.txt in the config folder</translation>
     </message>
     <message>
-      <source>Interface Font Size</source>
-      <translation>Interface Font Size</translation>
-    </message>
-    <message>
       <source>Interface language</source>
       <translation>Interface language</translation>
     </message>
@@ -3464,7 +3460,23 @@ de los diccionarios Stardict, Babylon y GLS.</translation>
     </message>
     <message>
       <source>GoldenDict-ng is a dictionary software.</source>
-      <translation type="unfinished">GoldenDict-ng is a dictionary software.</translation>
+      <translation>GoldenDict-ng is a dictionary software.</translation>
+    </message>
+    <message>
+      <source>Enable Interface Font</source>
+      <translation type="unfinished">Enable Interface Font</translation>
+    </message>
+    <message>
+      <source>Font</source>
+      <translation type="unfinished">Font</translation>
+    </message>
+    <message>
+      <source>Font Size</source>
+      <translation type="unfinished">Font Size</translation>
+    </message>
+    <message>
+      <source>None</source>
+      <translation>Ninguno</translation>
     </message>
   </context>
   <context>
@@ -3604,11 +3616,11 @@ de los diccionarios Stardict, Babylon y GLS.</translation>
     </message>
     <message>
       <source>Force the word to be translated in Popup.</source>
-      <translation type="unfinished">Force the word to be translated in Popup.</translation>
+      <translation>Force the word to be translated in Popup.</translation>
     </message>
     <message>
       <source>Force the word to be translated in the mainwindow.</source>
-      <translation type="unfinished">Force the word to be translated in the mainwindow.</translation>
+      <translation>Force the word to be translated in the mainwindow.</translation>
     </message>
   </context>
   <context>
@@ -3981,28 +3993,29 @@ Lista completa de idiomas disponibles puede encontrarse &lt;a href=&quot;https:/
       <translation>Confirmar eliminación</translation>
     </message>
     <message>
-      <source>Remove directory &lt;b&gt;%1&lt;/b&gt; from the list?</source>
-      <translation>¿Eliminar el directorio &lt;b&gt;%1&lt;/b&gt; de la lista?</translation>
-    </message>
-    <message>
-      <source>Remove site &lt;b&gt;%1&lt;/b&gt; from the list?</source>
-      <translation>¿Eliminar el sitio &lt;b&gt;%1&lt;/b&gt; de la lista?</translation>
-    </message>
-    <message>
-      <source>Remove program &lt;b&gt;%1&lt;/b&gt; from the list?</source>
-      <translation>¿Eliminar el programa &lt;b&gt;%1&lt;/b&gt; de la lista?</translation>
-    </message>
-    <message>
       <source>The most widely used method of transcription of Japanese, based on English phonology</source>
       <translation>El método de transcripción del japonés más utilizado,
 basado en la fonología inglesa</translation>
     </message>
-  </context>
-  <context>
-    <name>StylesComboBox</name>
     <message>
-      <source>None</source>
-      <translation>Ninguno</translation>
+      <source>Remove selected directories from the list?</source>
+      <translation type="unfinished">Remove selected directories from the list?</translation>
+    </message>
+    <message>
+      <source>Remove %1 directories from the list?</source>
+      <translation type="unfinished">Remove %1 directories from the list?</translation>
+    </message>
+    <message>
+      <source>Remove %1 sites from the list?</source>
+      <translation type="unfinished">Remove %1 sites from the list?</translation>
+    </message>
+    <message>
+      <source>Remove %1 servers from the list?</source>
+      <translation type="unfinished">Remove %1 servers from the list?</translation>
+    </message>
+    <message>
+      <source>Remove %1 programs from the list?</source>
+      <translation type="unfinished">Remove %1 programs from the list?</translation>
     </message>
   </context>
   <context>
