@@ -435,8 +435,6 @@ void LocalSchemeHandler::requestStarted( QWebEngineUrlRequestJob * requestJob )
   }
 
   QNetworkReply * reply = this->mManager.getArticleReply( request );
-  QNetworkRequest googleReq(QUrl("https://google.com/"));
-  QNetworkReply * random=this->mManager.get(googleReq);
   requestJob->reply( "text/html", reply);
   connect( requestJob, &QObject::destroyed, reply, &QObject::deleteLater );
 }
