@@ -1,0 +1,135 @@
+Fetching registry information from https://github.com/microsoft/vcpkg (HEAD)...
+Detecting compiler hash for triplet arm64-osx...
+Compiler found: /Applications/Xcode-16.3.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++
+The following packages will be built and installed:
+    bzip2[core,tool]:arm64-osx@1.0.8#6 -- git+https://github.com/microsoft/vcpkg@2d029da682847c5ebdc54e4dbea001331a02207e
+    hunspell:arm64-osx@1.7.2#1 -- git+https://github.com/microsoft/vcpkg@1d470eb79853a55a2bcbf8fce3e41f0cf7c737a3
+  * icu[core,tools]:arm64-osx@74.2#4 -- git+https://github.com/microsoft/vcpkg@291bbc492b8f73dea0dbd12051e9b12b21aef900
+    libiconv:arm64-osx@1.17#5 -- git+https://github.com/microsoft/vcpkg@22817264465e37fbbde994c614aae7d07bc727c0
+    liblzma:arm64-osx@5.6.3 -- git+https://github.com/microsoft/vcpkg@b5e5694620b41a4d668390e5d14fa2326e0afdc3
+  * libogg:arm64-osx@1.3.5#1 -- git+https://github.com/microsoft/vcpkg@98e27727c32704393494d32615c25b7b16eb3067
+    libvorbis:arm64-osx@1.3.7#3 -- git+https://github.com/microsoft/vcpkg@23d11198ff2df7a3af54f1c4645ef71a141f2a85
+    libzim:arm64-osx@9.0.0 -- git+https://github.com/microsoft/vcpkg@1b50ef00c5ff7e2ba8f3b064c8ffe6eb14a74f28
+    lzo:arm64-osx@2.10#9 -- git+https://github.com/microsoft/vcpkg@fcd8844a4e80d418bf894cf93a0453f067e404de
+    openssl:arm64-osx@3.4.0#1 -- git+https://github.com/microsoft/vcpkg@facccb0b0c47f9804b6e336096d0985c3e541eec
+  * vcpkg-cmake:arm64-osx@2024-04-23 -- git+https://github.com/microsoft/vcpkg@e74aa1e8f93278a8e71372f1fa08c3df420eb840
+  * vcpkg-cmake-config:arm64-osx@2024-05-23 -- git+https://github.com/microsoft/vcpkg@97a63e4bc1a17422ffe4eff71da53b4b561a7841
+  * vcpkg-cmake-get-vars:arm64-osx@2024-09-22 -- git+https://github.com/microsoft/vcpkg@f23148add155147f3d95ae622d3b0031beb25acf
+  * vcpkg-tool-meson:arm64-osx@1.6.1 -- git+https://github.com/microsoft/vcpkg@dc948c67d7f1359319f801078422e996b0a89fd0
+    xapian:arm64-osx@1.4.22#2 -- git+https://github.com/microsoft/vcpkg@09d9178c29620d437cfb26264b48e601c694aefd
+    zlib:arm64-osx@1.3.1 -- git+https://github.com/microsoft/vcpkg@3f05e04b9aededb96786a911a16193cdb711f0c9
+  * zstd:arm64-osx@1.5.6 -- git+https://github.com/microsoft/vcpkg@796171d4d359b6786b8e1380fb6da8e677a9087b
+Additional packages (*) will be modified to complete this operation.
+Restored 17 package(s) from /Users/bre/.cache/vcpkg/archives in 1.1 s. Use --debug to see more details.
+Installing 1/17 vcpkg-cmake:arm64-osx@2024-04-23...
+Elapsed time to handle vcpkg-cmake:arm64-osx: 1.89 ms
+vcpkg-cmake:arm64-osx package ABI: 5e7652048f6ca5994a3c5befd428df291bd0fe87a5106208101aab7830c166b7
+Installing 2/17 bzip2[core,tool]:arm64-osx@1.0.8#6...
+Elapsed time to handle bzip2:arm64-osx: 2.22 ms
+bzip2:arm64-osx package ABI: c95d54ec9ab32e1762b7b4d5d05ce652a7019c34513944d66375225e290d662a
+Installing 3/17 libiconv:arm64-osx@1.17#5...
+Elapsed time to handle libiconv:arm64-osx: 846 us
+libiconv:arm64-osx package ABI: 3831be2e6c477d9a7346c497f4bfb1df83afe0b37b9eb00dc1219762d3715d66
+Installing 4/17 hunspell:arm64-osx@1.7.2#1...
+Elapsed time to handle hunspell:arm64-osx: 2.12 ms
+hunspell:arm64-osx package ABI: 24a59a9b1348f73e480cf06bc2924865822aced41201d25e4ef10c36a4f33236
+Installing 5/17 vcpkg-cmake-config:arm64-osx@2024-05-23...
+Elapsed time to handle vcpkg-cmake-config:arm64-osx: 1.05 ms
+vcpkg-cmake-config:arm64-osx package ABI: 647034861cf9f34c0345b944a6f81bf9333cb9b823361ee92f101769ad4ef9c6
+Installing 6/17 liblzma:arm64-osx@5.6.3...
+Elapsed time to handle liblzma:arm64-osx: 7.12 ms
+liblzma:arm64-osx package ABI: c3b263caf961e65508eef9b1bc0e25f6a99c6a2d09c85419e4b1462afe89c085
+Installing 7/17 libogg:arm64-osx@1.3.5#1...
+Elapsed time to handle libogg:arm64-osx: 2.58 ms
+libogg:arm64-osx package ABI: 853594f359e5c6d7c4ca88add14f53e0b480ae817662f40e46f1ea69eaf2c109
+Installing 8/17 libvorbis:arm64-osx@1.3.7#3...
+Elapsed time to handle libvorbis:arm64-osx: 4.73 ms
+libvorbis:arm64-osx package ABI: 6ee47840a1ac82882d7ace220c34bb0fbd85734814198e67813b399c0781a121
+Installing 9/17 zstd:arm64-osx@1.5.6...
+Elapsed time to handle zstd:arm64-osx: 4.41 ms
+zstd:arm64-osx package ABI: 56c5e6a5ef339db6482f2221a0137cd2b34b1303e79e6bae296622d41b4e1ecc
+Installing 10/17 vcpkg-cmake-get-vars:arm64-osx@2024-09-22...
+Elapsed time to handle vcpkg-cmake-get-vars:arm64-osx: 1.43 ms
+vcpkg-cmake-get-vars:arm64-osx package ABI: b0563866a0c3fef9d6c0a0e4a818b1ed033cd1fc6bb8ab5351a650176c234d57
+Installing 11/17 vcpkg-tool-meson:arm64-osx@1.6.1...
+Elapsed time to handle vcpkg-tool-meson:arm64-osx: 2.08 ms
+vcpkg-tool-meson:arm64-osx package ABI: bd563445c336017e00d1c875f9b588baefe9c51bc4359f9d2f03c07b3cd11d5a
+Installing 12/17 icu[core,tools]:arm64-osx@74.2#4...
+Elapsed time to handle icu:arm64-osx: 37 ms
+icu:arm64-osx package ABI: e826a53c0fa4f0ea04247bb4d6fad281d7e1edd455515f1e3f8334132484cb07
+Installing 13/17 libzim:arm64-osx@9.0.0...
+Elapsed time to handle libzim:arm64-osx: 3.84 ms
+libzim:arm64-osx package ABI: 093b946e69f4faed0402c88c921a2c83965615a618d909afbea327e5ddd3bdd1
+Installing 14/17 lzo:arm64-osx@2.10#9...
+Elapsed time to handle lzo:arm64-osx: 3.72 ms
+lzo:arm64-osx package ABI: 60a474a3b6cfa5cf57ad1a40a88859c71564da48961a4abeb6271153d6f1fa08
+Installing 15/17 openssl:arm64-osx@3.4.0#1...
+Elapsed time to handle openssl:arm64-osx: 25.9 ms
+openssl:arm64-osx package ABI: 544240b9931f4e1124dfc13733adef60574394d530f4ddbf7c3bb29023ed5b61
+Installing 16/17 zlib:arm64-osx@1.3.1...
+Elapsed time to handle zlib:arm64-osx: 2.48 ms
+zlib:arm64-osx package ABI: 236a01368ee06068631f4ac871300a2ba79a20d2f71f7e4eeb46248d1962f170
+Installing 17/17 xapian:arm64-osx@1.4.22#2...
+Elapsed time to handle xapian:arm64-osx: 91.4 ms
+xapian:arm64-osx package ABI: 531032e4a33d792df0a90a325e7588d87dad00860d2d8362550d8d157f6720fc
+The package bzip2 is compatible with built-in CMake targets:
+
+    find_package(BZip2 REQUIRED)
+    target_link_libraries(main PRIVATE BZip2::BZip2)
+
+hunspell provides pkg-config modules:
+
+  # Hunspell spellchecking library
+  hunspell
+
+liblzma is compatible with built-in CMake targets:
+
+    find_package(LibLZMA REQUIRED)
+    target_link_libraries(main PRIVATE LibLZMA::LibLZMA)
+
+liblzma provides CMake targets:
+
+    find_package(liblzma CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE liblzma::liblzma)
+
+The package libvorbis provides CMake targets:
+
+    # Vorbis reference encoder and decoder, low-level API
+    find_package(Vorbis CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE Vorbis::vorbis)
+
+    # Audio stream decoding and basic manipulation, high-level API
+    find_package(Vorbis CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE Vorbis::vorbisfile)
+
+    # Convenience API for setting up an encoding environment
+    find_package(Vorbis CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE Vorbis::vorbisenc)
+
+libzim provides pkg-config modules:
+
+  # A Library to read/write ZIM files.
+  libzim
+
+lzo provides pkg-config modules:
+
+  # LZO - a real-time data compression library
+  lzo2
+
+openssl is compatible with built-in CMake targets:
+
+  find_package(OpenSSL REQUIRED)
+  target_link_libraries(main PRIVATE OpenSSL::SSL)
+  target_link_libraries(main PRIVATE OpenSSL::Crypto)
+
+The package zlib is compatible with built-in CMake targets:
+
+    find_package(ZLIB REQUIRED)
+    target_link_libraries(main PRIVATE ZLIB::ZLIB)
+
+xapian provides pkg-config modules:
+
+  # Search Engine Library
+  xapian-core
+
+All requested installations completed successfully in: 197 ms
