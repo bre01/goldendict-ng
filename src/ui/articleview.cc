@@ -26,18 +26,11 @@
 #include <QWebEngineScript>
 #include <QWebEngineScriptCollection>
 #include <QWebEngineSettings>
-#include <QtConcurrent/qtconcurrentrun.h>
-#include <QtCore/qmutex.h>
-#include <algorithm>
-#include <atomic>
-#include <iterator>
 #include <map>
 #include <QApplication>
 #include <QRandomGenerator>
 #include <QWebEngineContextMenuRequest>
 #include <QWebEngineFindTextResult>
-#include <memory>
-#include <shared_mutex>
 #include <utility>
 #ifdef Q_OS_WIN32
   #include <windows.h>
@@ -597,7 +590,6 @@ void ArticleView::tryMangleWebsiteClickedUrl( QUrl & url, Contexts & contexts )
 void ArticleView::load( QUrl const & url )
 {
   webview->load( url );
-  QString str=url.toString();
 }
 
 void ArticleView::cleanupTemp()
@@ -1778,11 +1770,6 @@ void ArticleView::resourceDownloadFinished( const sptr< Dictionary::DataRequest 
                this,
                &ArticleView::audioPlayerError,
                Qt::UniqueConnection );
-      QByteArray byteArray(data.data(), static_cast<int>(data.size()));
-      QString base64Audio = byteArray.toBase64();
-
-      // For debug, output first 200 chars to avoid flooding log
-      qDebug() << "Base64 audio full 1 " << base64Audio;
       QString errorMessage = audioPlayer->play( data.data(), data.size() );
       if ( !errorMessage.isEmpty() ) {
         QMessageBox::critical( this, "GoldenDict", tr( "Failed to play sound file: %1" ).arg( errorMessage ) );
@@ -1828,11 +1815,6 @@ void ArticleView::audioDownloadFinished( const sptr< Dictionary::DataRequest > &
              &ArticleView::audioPlayerError,
              Qt::UniqueConnection );
     QString errorMessage = audioPlayer->play( data.data(), data.size() );
-    QByteArray byteArray(data.data(), static_cast<int>(data.size()));
-    QString base64Audio = byteArray.toBase64();
-
-    // For debug, output first 200 chars to avoid flooding log
-    qDebug() << "Base64 audio full " << base64Audio;
     if ( !errorMessage.isEmpty() ) {
       QMessageBox::critical( this, "GoldenDict", tr( "Failed to play sound file: %1" ).arg( errorMessage ) );
     }

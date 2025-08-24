@@ -93,10 +93,6 @@ class ArticleView: public QWidget
     AudioResource resource;
   };
 
-  bool race=false;
-
-  bool resourceLocked=false;
-
   void highlightFTSResults();
   void performFtsFindOperation( bool backwards );
 
