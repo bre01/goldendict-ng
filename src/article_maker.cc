@@ -240,10 +240,19 @@ std::string ArticleMaker::readCssFile( const QString & fileName, std::string med
 
 std::string ArticleMaker::makeNotFoundBody( const QString & word, const QString & group )
 {
-  string result( "<div class=\"gdnotfound\"><p>" );
+  //string result( "<div class=\"gdnotfound\"><p>" );
+  string result( "<div class=""><p>" );
 
   if ( word.size() ) {
+    /*
     result += tr( "No translation for <b dir=\"%3\">%1</b> was found in group <b>%2</b>." )
+                .arg( QString::fromUtf8( Html::escape( word.toUtf8().data() ).c_str() ),
+                      QString::fromUtf8( Html::escape( group.toUtf8().data() ).c_str() ),
+                      word.isRightToLeft() ? "rtl" : "ltr" )
+                .toUtf8()
+                .data();
+                */
+    result += tr( "%1" )
                 .arg( QString::fromUtf8( Html::escape( word.toUtf8().data() ).c_str() ),
                       QString::fromUtf8( Html::escape( group.toUtf8().data() ).c_str() ),
                       word.isRightToLeft() ? "rtl" : "ltr" )
@@ -742,7 +751,8 @@ void ArticleRequest::bodyFinished()
 
       // Larger words are usually whole sentences - don't clutter the output
       // with their full bodies.
-      footer += ArticleMaker::makeNotFoundBody( word.size() < 40 ? word : word.left( 40 ) + "...", group.name );
+      //footer += ArticleMaker::makeNotFoundBody( word.size() < 40 ? word : word.left( 40 ) + "...", group.name );
+      footer += ArticleMaker::makeNotFoundBody( word , group.name );
 
       // When there were no definitions, we run stemmed search.
       stemmedWordFinder = std::make_shared< WordFinder >( this );

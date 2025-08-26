@@ -235,9 +235,11 @@ ArticleView::ArticleView( QWidget * parent,
 
   // Set up an Anki action if Anki integration is enabled in settings.
   if ( cfg.preferences.ankiConnectServer.enabled ) {
-    sendToAnkiAction.setShortcut( QKeySequence( "Ctrl+Shift+N" ) );
+    sendToAnkiAction.setShortcut( QKeySequence( "Meta+f" ) );
     webview->addAction( &sendToAnkiAction );
+    webview->addAction( &sendToAnkiTypeAction );
     connect( &sendToAnkiAction, &QAction::triggered, this, &ArticleView::handleAnkiAction );
+    connect(&sendToAnkiTypeAction,&QAction::triggered,this,&ArticleView::handleAnkiAction);
   }
 }
 
@@ -1024,6 +1026,21 @@ void ArticleView::makeAnkiCardFromArticle( const QString & article_id )
         //sendToAnki(webview->title(), embeddedHtml, translateLine->text());
   });
 }
+QString ArticleView::makeAnkiCardFromArticleNoAudio( const QString & article_id )
+{
+  const auto js_code = QString( R"EOF(document.getElementById("gdarticlefrom-%1").innerHTML)EOF" ).arg( article_id );
+  const auto js_css=QString(R"EOF(document.getElementsByTagName("style")[0].outerHTML)EOF" );
+  auto st = std::make_shared<QString>();
+  webview->page()->runJavaScript( js_code, [ this,st]( const QVariant & article_text ) {
+    st->append(article_text.toString());
+  } );
+  webview->page()->runJavaScript(js_css,[this,st](const QVariant &css_text){
+    st->append(css_text.toString());
+    //replaceTags(*st);
+    //sendToAnki(webview->title(), st, translateLine->text());
+  });
+  return *st;
+}
 
 void ArticleView::openLink( const QUrl & url, const QUrl & ref, const QString & scrollTo, const Contexts & contexts_ )
 {
@@ -1332,9 +1349,16 @@ void ArticleView::handleAnkiAction()
   if ( webview->selectedText().isEmpty() ) {
     makeAnkiCardFromArticle( getActiveArticleId() );
   }
+  else if (true){
+    QString str = webview->title();
+    str.replace(webview->selectedText(),"~~~~" );
+    QString back="<a href='goldendict://"+webview->selectedText()+"'>"+webview->selectedText()+"</a>";
+    sendToAnki( str, back, webview->selectedText() );
+  }
   else {
     sendToAnki( webview->title(), webview->selectedText(), translateLine->text() );
   }
+  //we send anki the full word we queried and let word that is selected to be typed in anki
 }
 
 void ArticleView::reload()
@@ -1531,6 +1555,7 @@ void ArticleView::contextMenuRequested( const QPoint & pos )
   // If there is no selected text, it will extract text from the current article.
   if ( cfg.preferences.ankiConnectServer.enabled ) {
     menu.addAction( &sendToAnkiAction );
+    menu.addAction(&sendToAnkiTypeAction);
     sendToAnkiAction.setText( webview->selectedText().isEmpty() ? tr( "&Send Current Article to Anki" ) :
                                                                   tr( "&Send selected text to Anki" ) );
   }

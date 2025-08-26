@@ -47,6 +47,7 @@ class ArticleView: public QWidget
 
   /// An action used to create Anki notes.
   QAction sendToAnkiAction{ tr( "&Create Anki note" ), this };
+  QAction sendToAnkiTypeAction{ tr("&what is"),this};
 
   /// For resources opened via desktop services
   QSet< QString > desktopOpenedTempFiles;
@@ -153,7 +154,7 @@ public:
 
   /// Create a new Anki card from a currently displayed article with the provided id.
   /// This function will call QWebEnginePage::runJavaScript() to fetch the corresponding HTML.
-  void makeAnkiCardFromArticle( const QString & article_id );
+  void makeAnkiCardFromArticle( const QString & article_id );QString makeAnkiCardFromArticleNoAudio(const QString&article_id);
 
   /// Opens the given link. Supposed to be used in response to
   /// openLinkInNewTab() signal. The link scheme is therefore supposed to be
