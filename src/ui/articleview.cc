@@ -29,6 +29,7 @@
 #include <QWebEngineContextMenuRequest>
 #include <QWebEngineFindTextResult>
 #include <utility>
+#include <hunspell/hunspell.hxx>
 #ifdef Q_OS_WIN32
   #include <windows.h>
   #include <QPainter>
@@ -588,6 +589,7 @@ void ArticleView::tryMangleWebsiteClickedUrl( QUrl & url, Contexts & contexts )
 
 void ArticleView::load( const QUrl & url )
 {
+  currentUrl = url;
   webview->load( url );
 }
 
@@ -949,6 +951,7 @@ QString ArticleView::replaceTags(QString &html){
         onAudioRequestFinished(req, ptags, tag.id, html);
       });
   }
+  if (!tags.size())onAllAudioResourcesReady( nullptr,html );
 
   return QString();
 };
@@ -980,35 +983,65 @@ void ArticleView::replaceGdLookUpToSystemHandler(QString &originalHtml)
 
 void ArticleView::onAllAudioResourcesReady(std::shared_ptr<QVector<GdauTagInfo>> ptags,QString &originalHtml) {
   //return when any tag are unfinished
-  for(auto & tag:*ptags) {
+  if (ptags) {
+    for(auto & tag:*ptags) {
       if (!tag.resource.finished) return;
-  }
-
-  auto tags=*ptags;
-  for (const auto &tag : *ptags) {
-    qDebug() << tag.resource.base64Data <<'\n' ;
-    QString base64DataUrl = QString("data:audio/mp3;base64,%1").arg(tag.resource.base64Data);
-    QString newTag=tag.fullTag;
-    int onclickPosition=newTag.indexOf("onclick=");
-    newTag.insert(onclickPosition+9,"this.querySelector('audio').play();");
-
-    int insertPos = newTag.indexOf('>'); // position of first '>'
-    if (insertPos != -1) {
-      QString audioTag = QString(
-          R"(<audio> <source src="%1" type="audio/mpeg">
-               Your browser does not support the audio element.
-           </audio>)"
-      ).arg(base64DataUrl);
-      newTag.insert(insertPos+1,audioTag);
     }
 
-    qDebug() << tag.fullTag;
-    // Replace all occurrences of gdau URL with base64 URL in your HTML string
-    originalHtml.replace(tag.fullTag, newTag);
+    auto tags=*ptags;
+    for (const auto &tag : *ptags) {
+      qDebug() << tag.resource.base64Data <<'\n' ;
+      QString base64DataUrl = QString("data:audio/mp3;base64,%1").arg(tag.resource.base64Data);
+      QString newTag=tag.fullTag;
+      int onclickPosition=newTag.indexOf("onclick=");
+      newTag.insert(onclickPosition+9,"this.querySelector('audio').play();");
+
+      int insertPos = newTag.indexOf('>'); // position of first '>'
+      if (insertPos != -1) {
+        QString audioTag = QString(
+            R"(<audio> <source src="%1" type="audio/mpeg">
+               Your browser does not support the audio element.
+           </audio>)"
+        ).arg(base64DataUrl);
+        newTag.insert(insertPos+1,audioTag);
+      }
+
+      qDebug() << tag.fullTag;
+      // Replace all occurrences of gdau URL with base64 URL in your HTML string
+      originalHtml.replace(tag.fullTag, newTag);
+    }
   }
   replaceGdLookUpToSystemHandler(originalHtml);
+  if (!with)sendToAnki(webview->title(), originalHtml, translateLine->text());
+  else {
+    with=false;
+    //Hunspell hunspell()
+    QString contextWordStr="{{c1::"+contextWord+"}}";
+    QString clozeType=contextText.replace(contextWord, contextWordStr);
+    //QString upperWord=contextWord[0].toUpper()+contextWord.slice(1,contextWord.length()-1);
+    originalHtml.replace(contextWord, contextWordStr,Qt::CaseInsensitive);
+    //QString contextWordStrUppder="{{c1::"+upperWord+"}}";
+    //originalHtml.replace(upperWord, contextWordStrUppder);
 
-  sendToAnki(webview->title(), originalHtml, translateLine->text());
+
+
+    QString back="<a href='goldendict://"+contextWord+"'>"+contextWord+"</a>";
+    sendToAnki(clozeType,wrapWithCloze( originalHtml ), back);
+  }
+
+}
+QString ArticleView::wrapWithCloze(QString text) {
+  QRegularExpression rx(R"(\[[^\]]+\])");
+  QRegularExpressionMatchIterator it = rx.globalMatch(text);
+
+  while (it.hasNext()) {
+    QRegularExpressionMatch match = it.next();
+    QString captured = match.captured(0); // the full [ ... ]
+    QString replacement = QString("{{c1::%1}}").arg(captured);
+    text.replace(match.capturedStart(0), captured.length(), replacement);
+  }
+
+  return text;
 }
 
 
@@ -1071,6 +1104,16 @@ void ArticleView::openLink( const QUrl & url, const QUrl & ref, const QString & 
     }
     qDebug() << "requested to make Anki card.";
     return;
+  }
+  else if (url.scheme().compare("ankicardwith")==0) {
+    if ( !url.path().isEmpty() && webview->selectedText().isEmpty() ) {
+      with=true;
+      makeAnkiCardFromArticle( url.path() );
+    }
+    else {
+      sendToAnki( webview->title(), webview->selectedText(), translateLine->text() );
+    }
+
   }
   else if ( url.scheme().compare( "bword" ) == 0 || url.scheme().compare( "entry" ) == 0 ) {
     if ( Utils::Url::hasQueryItem( ref, "dictionaries" ) ) {
@@ -1350,10 +1393,42 @@ void ArticleView::handleAnkiAction()
     makeAnkiCardFromArticle( getActiveArticleId() );
   }
   else if (true){
+
+    //this->hide();   // <-- we keep it hidden
+
+    // Connect: once page finishes loading, dump HTML
+    /*
+    QObject::connect(view, &QWebEngineView::loadFinished,[view](bool ok) {
+        if (ok) {
+            view->page()->toHtml([](const QString &html) {
+                qDebug().noquote() << "=== ARTICLE HTML START ===";
+                qDebug().noquote() << html;
+                qDebug().noquote() << "=== ARTICLE HTML END ===";
+                QCoreApplication::quit(); // exit after we got the HTML
+            });
+        } else {
+            qWarning() << "Failed to load article.";
+            QCoreApplication::quit();
+        }
+    });
+    */
+    //QString word("gdlookup://localhost/");
+    QString word=webview->selectedText();
+    QUrl url=currentUrl;
+
+    QString query=currentUrl.query(  );
+    query.replace(QRegularExpression(R"(word=[^&]+)"), "word=" + word);
+    url.setQuery( query );
+    contextText=webview->title();
+    contextWord=webview->selectedText();
+    this->load(url);
+    //this->makeAnkiCardFromArticleForCloze(  );
+    /*
     QString str = webview->title();
     str.replace(webview->selectedText(),"~~~~" );
     QString back="<a href='goldendict://"+webview->selectedText()+"'>"+webview->selectedText()+"</a>";
     sendToAnki( str, back, webview->selectedText() );
+    */
   }
   else {
     sendToAnki( webview->title(), webview->selectedText(), translateLine->text() );

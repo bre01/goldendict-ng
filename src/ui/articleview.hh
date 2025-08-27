@@ -75,6 +75,10 @@ class ArticleView: public QWidget
   QStringList uniqueMatches;
 
   QString delayedHighlightText;
+  QUrl currentUrl;
+  bool with;
+  QString contextText;
+  QString contextWord;
 
 
   struct AudioResource {
@@ -192,7 +196,7 @@ public:
 
   void onAudioRequestFinished(sptr<Dictionary::DataRequest> req, std::shared_ptr<QVector<GdauTagInfo>> tags, int ,QString html);
 
-  void onAllAudioResourcesReady(std::shared_ptr<QVector<GdauTagInfo>> tags,QString & html);
+  void onAllAudioResourcesReady(std::shared_ptr<QVector<GdauTagInfo>> tags,QString & html);QString wrapWithCloze(QString text);void makeAnkiCardFromArticleWith(const QString&article_id);
 
   void replaceGdLookUpToSystemHandler(QString & originalHtml);
 private:

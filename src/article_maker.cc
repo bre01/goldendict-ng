@@ -689,6 +689,12 @@ void ArticleRequest::bodyFinished()
           </a>
           )EOF" };
           head += link.arg( Html::escape( dictId ).c_str(), tr( "Make a new Anki note" ) ).toStdString();
+          QString linkWith{ R"EOF(
+          <a href="ankicardWith:%1" class="ankibutton" title="%2" >
+          <img src="qrc:///icons/add-anki-icon.svg">
+          </a>
+          )EOF" };
+          head += linkWith.arg( Html::escape( dictId ).c_str(), tr( "Make a new AnkiWith note" ) ).toStdString();
         }
 
         fmt::format_to(
