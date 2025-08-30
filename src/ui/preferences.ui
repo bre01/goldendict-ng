@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>788</width>
-    <height>730</height>
+    <height>873</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <property name="iconSize">
       <size>
@@ -33,7 +33,7 @@
       </size>
      </property>
      <property name="elideMode">
-      <enum>Qt::ElideNone</enum>
+      <enum>Qt::TextElideMode::ElideNone</enum>
      </property>
      <property name="usesScrollButtons">
       <bool>false</bool>
@@ -179,7 +179,7 @@ to open main window and perform other tasks.</string>
           <string>Enable system tray icon</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
          </property>
          <property name="flat">
           <bool>false</bool>
@@ -219,7 +219,7 @@ the application.</string>
        <item row="16" column="0" colspan="2">
         <spacer name="verticalSpacer">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -355,7 +355,7 @@ the application.</string>
                </size>
               </property>
               <property name="sizeAdjustPolicy">
-               <enum>QComboBox::AdjustToContents</enum>
+               <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
               </property>
              </widget>
             </item>
@@ -497,7 +497,7 @@ the application.</string>
           <item>
            <spacer name="verticalSpacer_5">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -586,14 +586,14 @@ the application.</string>
              </sizepolicy>
             </property>
             <property name="fontFilters">
-             <set>QFontComboBox::MonospacedFonts</set>
+             <set>QFontComboBox::FontFilter::MonospacedFonts</set>
             </property>
            </widget>
           </item>
           <item>
            <spacer name="verticalSpacer_9">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -653,7 +653,7 @@ the application.</string>
           <string>Track Selection change</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -673,10 +673,10 @@ in the pressed state when the word selection changes.</string>
           <item>
            <widget class="QFrame" name="scanPopupModifiers">
             <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
+             <enum>QFrame::Shape::NoFrame</enum>
             </property>
             <property name="frameShadow">
-             <enum>QFrame::Plain</enum>
+             <enum>QFrame::Shadow::Plain</enum>
             </property>
             <property name="lineWidth">
              <number>0</number>
@@ -699,7 +699,7 @@ in the pressed state when the word selection changes.</string>
                <item>
                 <spacer name="horizontalSpacer">
                  <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                  <enum>Qt::Orientation::Horizontal</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -756,10 +756,10 @@ in the pressed state when the word selection changes.</string>
                <item>
                 <widget class="QFrame" name="frame">
                  <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
+                  <enum>QFrame::Shape::NoFrame</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
+                  <enum>QFrame::Shadow::Raised</enum>
                  </property>
                  <property name="lineWidth">
                   <number>0</number>
@@ -840,7 +840,7 @@ in the pressed state when the word selection changes.</string>
        <item>
         <spacer name="verticalSpacer_6">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -873,7 +873,7 @@ in the pressed state when the word selection changes.</string>
          <item>
           <spacer name="horizontalSpacer_2">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -900,7 +900,7 @@ in the pressed state when the word selection changes.</string>
          <item>
           <spacer name="horizontalSpacer_4">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -918,10 +918,10 @@ in the pressed state when the word selection changes.</string>
        <item>
         <spacer name="verticalSpacer_13">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
+          <enum>QSizePolicy::Policy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -944,7 +944,7 @@ in the pressed state when the word selection changes.</string>
        <item>
         <spacer name="verticalSpacer_12">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -1037,7 +1037,7 @@ in the pressed state when the word selection changes.</string>
        <item>
         <spacer name="verticalSpacer_2">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -1160,7 +1160,7 @@ for all program's network requests.</string>
                <item>
                 <widget class="QLineEdit" name="proxyPassword">
                  <property name="echoMode">
-                  <enum>QLineEdit::Password</enum>
+                  <enum>QLineEdit::EchoMode::Password</enum>
                  </property>
                 </widget>
                </item>
@@ -1226,7 +1226,7 @@ for all program's network requests.</string>
             <item>
              <spacer name="horizontalSpacer_16">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -1263,7 +1263,7 @@ for all program's network requests.</string>
             <item>
              <spacer name="horizontalSpacer_17">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -1320,6 +1320,19 @@ for all program's network requests.</string>
              </widget>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_31">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="ankiTest"/>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="ankiVLayout"/>
           </item>
          </layout>
         </widget>
@@ -1388,7 +1401,7 @@ clears its network cache from disk during exit.</string>
          <item>
           <spacer name="horizontalSpacer_15">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1417,7 +1430,7 @@ download page.</string>
        <item>
         <spacer name="verticalSpacer_3">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -1556,7 +1569,7 @@ download page.</string>
             <item>
              <spacer name="horizontalSpacer_10">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -1599,7 +1612,7 @@ download page.</string>
        <item>
         <spacer name="verticalSpacer_7">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -1672,7 +1685,7 @@ download page.</string>
               <item>
                <spacer name="horizontalSpacer_8">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -1719,7 +1732,7 @@ download page.</string>
               <item>
                <spacer name="horizontalSpacer_9">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Orientation::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -1734,7 +1747,7 @@ download page.</string>
             <item>
              <spacer name="verticalSpacer_8">
               <property name="orientation">
-               <enum>Qt::Vertical</enum>
+               <enum>Qt::Orientation::Vertical</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -1809,7 +1822,7 @@ download page.</string>
             <item>
              <spacer name="verticalSpacer_4">
               <property name="orientation">
-               <enum>Qt::Vertical</enum>
+               <enum>Qt::Orientation::Vertical</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -1887,7 +1900,7 @@ from mouse-over, selection, clipboard or command line</string>
           <item row="1" column="3">
            <spacer name="horizontalSpacer_14">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -1943,7 +1956,7 @@ from mouse-over, selection, clipboard or command line</string>
           <item row="0" column="3">
            <spacer name="horizontalSpacer_11">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -2017,7 +2030,7 @@ from Stardict, Babylon and GLS dictionaries</string>
        <item>
         <spacer name="verticalSpacer_17">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -2034,10 +2047,10 @@ from Stardict, Babylon and GLS dictionaries</string>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Help|QDialogButtonBox::StandardButton::Ok</set>
      </property>
     </widget>
    </item>

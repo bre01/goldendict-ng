@@ -122,7 +122,9 @@ set(QSINGLEAPP_SOURCE_FILES
         thirdparty/qtsingleapplication/src/qtsingleapplication.h
 )
 
-qt_add_executable(${GOLDENDICT})
+qt_add_executable(${GOLDENDICT}
+        src/ankiProfilesHelper.cc
+        src/ankiProfilesHelper.hh)
 
 target_sources(${GOLDENDICT} PRIVATE
         icons/flags.qrc

@@ -86,13 +86,22 @@ ProxyServer::ProxyServer():
 {
 }
 
-AnkiConnectServer::AnkiConnectServer():
+AnkiProfileV0::AnkiProfileV0():
   enabled( false ),
   host( "127.0.0.1" ),
   port( 8765 ),
   word( "word" ),
   text( "selected_text" ),
   sentence( "marked_sentence" )
+{
+}
+AnkiProfile::AnkiProfile(QString _name):
+  name(_name),
+  host( "127.0.0.1" ),
+  port( 8765 )
+  //word( "word" ),
+  //text( "selected_text" ),
+  //sentence( "marked_sentence" )
 {
 }
 
@@ -965,6 +974,9 @@ Class load()
       c.preferences.proxyServer.password       = proxy.namedItem( "password" ).toElement().text();
     }
 
+
+
+
     QDomNode ankiConnectServer = preferences.namedItem( "ankiConnectServer" );
 
     if ( !ankiConnectServer.isNull() ) {
@@ -977,6 +989,36 @@ Class load()
       c.preferences.ankiConnectServer.word     = ankiConnectServer.namedItem( "word" ).toElement().text();
       c.preferences.ankiConnectServer.text     = ankiConnectServer.namedItem( "text" ).toElement().text();
       c.preferences.ankiConnectServer.sentence = ankiConnectServer.namedItem( "sentence" ).toElement().text();
+    }
+
+    QDomNode ankiConnectProfilesTag = preferences.namedItem( "ankiProfiles" );
+    if (!ankiConnectProfilesTag.isNull()) {
+      QDomNodeList profiles=ankiConnectProfilesTag.childNodes();
+      for (int i=0;i<profiles.length();i++) {
+          QDomElement profileElem=profiles.at(i).toElement();
+          AnkiProfile p(profileElem.tagName());
+          //p.name    = profileElem.attribute("name", QString("Profile%1").arg(i+1));
+        //p.enabled = profileElem.namedItem("enabled").toElement().text() == "1";
+
+        p.host    = profileElem.namedItem("host").toElement().text();
+        p.port    = profileElem.namedItem("port").toElement().text().toInt();
+        p.deck    = profileElem.namedItem("deck").toElement().text();
+        p.model   = profileElem.namedItem("model").toElement().text();
+        QDomNode fieldsTag=profileElem.namedItem( "fields" );
+        QDomNodeList fieldTags=fieldsTag.toElement().childNodes();
+        for (int i=0;i<fieldTags.length();i++) {
+          QDomNode fieldNode=fieldTags.at(i).toElement();
+          p.fields[fieldNode.nodeName()]=fieldNode.toElement().text();
+
+        }
+        /*
+        p.text    = profileElem.namedItem("text").toElement().text();
+        p.word    = profileElem.namedItem("word").toElement().text();
+        p.sentence= profileElem.namedItem("sentence").toElement().text();
+        */
+        c.preferences.ankiConnectProfiles.push_back(p);
+      }
+
     }
 
     if ( !preferences.namedItem( "checkForNewReleases" ).isNull() ) {
@@ -1964,6 +2006,43 @@ void save( const Class & c )
       proxy.appendChild( opt );
     }
 
+    QDomElement profiles=dd.createElement( "ankiProfiles" );
+    preferences.appendChild( profiles);
+    QDomAttr enabled=dd.createAttribute( "enabled" );
+    enabled.setValue( c.preferences.ankiConnectEnabled?"1":"0" );
+    profiles.setAttributeNode( enabled);
+
+
+    for (auto &profile:c.preferences.ankiConnectProfiles) {
+      QDomElement profileTag=dd.createElement( "profile");
+
+      opt=dd.createElement("host");
+      opt.appendChild(dd.createTextNode( profile.host ));
+      profileTag.appendChild(opt);
+
+      opt=dd.createElement( "port" );
+      opt.appendChild(dd.createTextNode(QString::number(profile.port )));
+      profileTag.appendChild(opt);
+
+      opt = dd.createElement( "deck" );
+      opt.appendChild( dd.createTextNode( profile.deck ) );
+      profileTag.appendChild( opt );
+
+      opt = dd.createElement( "model" );
+      opt.appendChild( dd.createTextNode( profile.model ) );
+      profileTag.appendChild( opt );
+
+      QDomElement fieldsTag=dd.createElement( "fields" );
+      for (auto field:profile.fields){
+        opt=dd.createElement( field.at(0) );
+        opt.appendChild( dd.createTextNode(field.at(1)  ) );
+        fieldsTag.appendChild(  opt);
+      }
+      profiles.appendChild( profileTag);
+    }
+
+
+    /*
     //Anki connect
     {
       QDomElement proxy = dd.createElement( "ankiConnectServer" );
@@ -2001,6 +2080,7 @@ void save( const Class & c )
       opt.appendChild( dd.createTextNode( c.preferences.ankiConnectServer.sentence ) );
       proxy.appendChild( opt );
     }
+    */
 
     opt = dd.createElement( "checkForNewReleases" );
     opt.appendChild( dd.createTextNode( c.preferences.checkForNewReleases ? "1" : "0" ) );

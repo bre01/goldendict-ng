@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "ankiProfilesHelper.hh"
 #include "audio/internalplayerbackend.hh"
 #include "ex.hh"
 #include <QDateTime>
@@ -172,13 +173,12 @@ struct ProxyServer
 
   ProxyServer();
 };
-
-struct AnkiConnectServer
+struct AnkiProfileV0
 {
   bool enabled;
 
   QString host;
-  int port; // Port will be passed to QUrl::setPort() which expects an int.
+  int port; // port will be passed to qurl::setport() which expects an int.
 
   QString deck;
   QString model;
@@ -187,7 +187,30 @@ struct AnkiConnectServer
   QString text;
   QString sentence;
 
-  AnkiConnectServer();
+  AnkiProfileV0();
+};
+
+struct AnkiProfile
+{
+  QString name;
+  //bool enabled;
+
+
+  QString host;
+  int port; // port will be passed to qurl::setport() which expects an int.
+
+  QString deck;
+  QString model;
+
+  /*
+  qstring word;
+  qstring text;
+  qstring sentence;
+  */
+
+  QMap<QString, QString> fields;
+
+  AnkiProfile(QString name);
 };
 
 // A hotkey -- currently qt modifiers plus one or two keys
@@ -339,8 +362,9 @@ struct Preferences
   QString audioPlaybackProgram;
 
   ProxyServer proxyServer;
-  AnkiConnectServer ankiConnectServer;
-
+  bool ankiConnectEnabled;
+  AnkiProfileV0 ankiConnectServer;
+  QVector<AnkiProfile> ankiConnectProfiles;
   bool checkForNewReleases;
   bool disallowContentFromOtherSites;
   bool hideGoldenDictHeader;

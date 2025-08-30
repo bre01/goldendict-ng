@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QFontDatabase>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QThread>
 #include <QWebEngineProfile>
 #include <QWebEngineSettings>
@@ -350,6 +351,7 @@ Preferences::Preferences( QWidget * parent, Config::Class & cfg_ ):
   }
 
   //Anki connect
+  /*
   ui.useAnkiConnect->setChecked( p.ankiConnectServer.enabled );
   ui.ankiHost->setText( p.ankiConnectServer.host );
   ui.ankiPort->setValue( p.ankiConnectServer.port );
@@ -359,6 +361,33 @@ Preferences::Preferences( QWidget * parent, Config::Class & cfg_ ):
   ui.ankiText->setText( p.ankiConnectServer.text );
   ui.ankiWord->setText( p.ankiConnectServer.word );
   ui.ankiSentence->setText( p.ankiConnectServer.sentence );
+  */
+  //Anki Profiles
+  ui.useAnkiConnect->setEnabled( p.ankiConnectEnabled );
+  ankiProfilesHelper helper;
+    //this way the BoxLayout inherits QWidget
+  for (auto &profile :p.ankiConnectProfiles) {
+    QPushButton *addButton=new QPushButton("add profile");
+    connect(addButton,&QPushButton::clicked,this,[](){});
+    ui.ankiVLayout->addWidget(helper.newFieldRowWidget("host",profile.host));
+    ui.ankiVLayout->addWidget( helper.newFieldRowWidget( "deck",profile.deck ));
+    ui.ankiVLayout->addWidget( helper.newFieldRowWidget( "model",profile.model));
+    for (auto [key,value]:profile.fields.asKeyValueRange()) {
+            ui.ankiVLayout->addWidget( helper.newFieldRowWidget(key,value));
+    }
+    ui.ankiVLayout->addWidget(addButton);
+    break;
+    }
+    //helper.newFieldRowWidget( )
+    //ui.ankiVLayout->addWidget( rowWidget );
+
+
+    //ui.ankiVLayout->addWidget();
+    //ui.ankiTest->setText("test");
+
+
+
+
 
   connect( ui.customProxy, &QAbstractButton::toggled, this, &Preferences::customProxyToggled );
 
