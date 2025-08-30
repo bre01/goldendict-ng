@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>788</width>
+    <width>880</width>
     <height>873</height>
    </rect>
   </property>
@@ -1334,6 +1334,27 @@ for all program's network requests.</string>
           <item>
            <layout class="QVBoxLayout" name="ankiVLayout"/>
           </item>
+
+	  <item>
+  <widget class="QTabWidget" name="tabWidget_2">
+    <property name="currentIndex">
+      <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab">
+      <attribute name="title">
+        <string>Tab 1</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_tab1"/>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+        <string>Tab 2</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_tab2"/>
+    </widget>
+  </widget>
+</item>
+
          </layout>
         </widget>
        </item>

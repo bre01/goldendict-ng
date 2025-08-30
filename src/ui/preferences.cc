@@ -364,20 +364,27 @@ Preferences::Preferences( QWidget * parent, Config::Class & cfg_ ):
   */
   //Anki Profiles
   ui.useAnkiConnect->setEnabled( p.ankiConnectEnabled );
+  ui.useAnkiConnect->setEnabled( true);
   ankiProfilesHelper helper;
+  QWidget* widget;
+  QVBoxLayout* layout;
     //this way the BoxLayout inherits QWidget
-  for (auto &profile :p.ankiConnectProfiles) {
-    QPushButton *addButton=new QPushButton("add profile");
-    connect(addButton,&QPushButton::clicked,this,[](){});
-    ui.ankiVLayout->addWidget(helper.newFieldRowWidget("host",profile.host));
-    ui.ankiVLayout->addWidget( helper.newFieldRowWidget( "deck",profile.deck ));
-    ui.ankiVLayout->addWidget( helper.newFieldRowWidget( "model",profile.model));
-    for (auto [key,value]:profile.fields.asKeyValueRange()) {
-            ui.ankiVLayout->addWidget( helper.newFieldRowWidget(key,value));
-    }
-    ui.ankiVLayout->addWidget(addButton);
-    break;
-    }
+
+for (auto &profile :p.ankiConnectProfiles) {
+  //QPushButton *addButton=new QPushButton("add profile");
+  //connect(addButton,&QPushButton::clicked,this,[](){});
+  widget = new QWidget();
+  layout = new QVBoxLayout(widget);
+  layout->addWidget(helper.newFieldRowWidget("host",profile.host));
+  layout->addWidget( helper.newFieldRowWidget( "deck",profile.deck ));
+  layout->addWidget( helper.newFieldRowWidget( "model",profile.model));
+  for (auto [key,value]:profile.fields.asKeyValueRange()) {
+          layout->addWidget( helper.newFieldRowWidget(key,value));
+  }
+  ui.tabWidget_2->addTab( widget,profile.name );
+  //layout->addWidget(addButton);
+  //break;
+  }
     //helper.newFieldRowWidget( )
     //ui.ankiVLayout->addWidget( rowWidget );
 
