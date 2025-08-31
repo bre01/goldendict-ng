@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "ankiProfilesHelper.hh"
 #include "audio/internalplayerbackend.hh"
 #include "ex.hh"
 #include <QDateTime>
@@ -183,9 +182,11 @@ struct AnkiProfileV0
   QString deck;
   QString model;
 
+
   QString word;
   QString text;
   QString sentence;
+  QMap<QString, QString> fields;
 
   AnkiProfileV0();
 };

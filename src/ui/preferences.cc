@@ -1,6 +1,8 @@
 #include "keyboardstate.hh"
 #include "language.hh"
 #include "preferences.hh"
+
+#include "AnkiProfilesHelper.hh"
 #include "help.hh"
 #include <QDir>
 #include <QFontDatabase>
@@ -365,26 +367,55 @@ Preferences::Preferences( QWidget * parent, Config::Class & cfg_ ):
   //Anki Profiles
   ui.useAnkiConnect->setEnabled( p.ankiConnectEnabled );
   ui.useAnkiConnect->setEnabled( true);
-  ankiProfilesHelper helper;
+  AnkiProfilesHelper helper(ui.tabWidget_2);
+  helper.createTabsFromProfiles( p.ankiConnectProfiles );
   QWidget* widget;
   QVBoxLayout* layout;
     //this way the BoxLayout inherits QWidget
 
-for (auto &profile :p.ankiConnectProfiles) {
+  /*
+  connect(ui.newProfileButton,&QPushButton::clicked,this,[this,helper]() {
+      QWidget* widget=new QWidget();
+      QVBoxLayout *layout = new QVBoxLayout(widget);
+      layout->addWidget(helper.newFieldRowWidget("host","127.0.0.1"));
+      layout->addWidget(helper.newFieldRowWidget( "port","9999"));
+      layout->addWidget( helper.newFieldRowWidget( "deck","enter deck name..."));
+      layout->addWidget( helper.newFieldRowWidget( "model","enter model name... "));
+      QWidget* hbox=new QWidget();
+
+      QHBoxLayout *hLayout = new QHBoxLayout(hbox);
+      QPushButton* addFieldButton = new QPushButton("Add Field");
+      QLineEdit* filedName = new QLineEdit("name");
+      QLineEdit* fieldValue = new QLineEdit("field");
+
+      hLayout->addWidget( addFieldButton);
+
+      connect(addFieldButton,&QPushButton::clicked,this,[this]() {
+          layout->addWidget(addFieldButton);
+      });
+
+      layout->addWidget(  )
+  }) ;
+  connect (ui.deleteProfileButton,&QPushButton::clicked,this,[this]() {
+    ui.tabWidget_2->removeTab(ui.tabWidget_2->currentIndex());
+  });
+  for (auto &profile :p.ankiConnectProfiles) {
   //QPushButton *addButton=new QPushButton("add profile");
   //connect(addButton,&QPushButton::clicked,this,[](){});
-  widget = new QWidget();
-  layout = new QVBoxLayout(widget);
-  layout->addWidget(helper.newFieldRowWidget("host",profile.host));
-  layout->addWidget( helper.newFieldRowWidget( "deck",profile.deck ));
-  layout->addWidget( helper.newFieldRowWidget( "model",profile.model));
+    widget = new QWidget();
+    layout = new QVBoxLayout(widget);
+    layout->addWidget(helper.newLabelEditWidget("host",profile.host));
+    layout->addWidget(helper.newLabelEditWidget( "port",QString::number(profile.port )));
+    layout->addWidget( helper.newLabelEditWidget( "deck",profile.deck ));
+    layout->addWidget( helper.newLabelEditWidget( "model",profile.model));
   for (auto [key,value]:profile.fields.asKeyValueRange()) {
-          layout->addWidget( helper.newFieldRowWidget(key,value));
+          layout->addWidget( helper.newLabelEditWidget(key,value));
   }
   ui.tabWidget_2->addTab( widget,profile.name );
   //layout->addWidget(addButton);
   //break;
   }
+  //ui.tabWidget_2->setCurrentIndex( 2);
     //helper.newFieldRowWidget( )
     //ui.ankiVLayout->addWidget( rowWidget );
 
@@ -392,6 +423,7 @@ for (auto &profile :p.ankiConnectProfiles) {
     //ui.ankiVLayout->addWidget();
     //ui.ankiTest->setText("test");
 
+*/
 
 
 
@@ -581,15 +613,25 @@ Config::Preferences Preferences::getPreferences()
   p.proxyServer.password = ui.proxyPassword->text();
 
   //Anki connect
+
   p.ankiConnectServer.enabled = ui.useAnkiConnect->isChecked();
-  p.ankiConnectServer.host    = ui.ankiHost->text();
+  AnkiProfilesHelper* helper = new AnkiProfilesHelper(ui.tabWidget_2);
+  helper->setPreferences(p);
+
+  /*
+  p.ankiConnectServer.host    = ui.tabWidget_2->currentWidget();
+
   p.ankiConnectServer.port    = (unsigned)ui.ankiPort->value();
   p.ankiConnectServer.deck    = ui.ankiDeck->text();
   p.ankiConnectServer.model   = ui.ankiModel->text();
+  */
   //Anki connect fields
+  /*
   p.ankiConnectServer.text     = ui.ankiText->text();
   p.ankiConnectServer.word     = ui.ankiWord->text();
   p.ankiConnectServer.sentence = ui.ankiSentence->text();
+  */
+
 
   p.checkForNewReleases           = ui.checkForNewReleases->isChecked();
   p.disallowContentFromOtherSites = ui.disallowContentFromOtherSites->isChecked();
